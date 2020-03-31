@@ -1,2 +1,2 @@
 # SCAN
-Smart Lock Management Android App for Major Project 
+Smart Lock Management Android App Using IOT and Socket Programming

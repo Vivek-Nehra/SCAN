@@ -1,20 +1,35 @@
 package com.example.scan;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.example.scan.util.Watcher;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mauth;
+    private ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,33 +37,73 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mauth = FirebaseAuth.getInstance();
 
+        pd = new ProgressDialog(this);
+        pd.setCanceledOnTouchOutside(false);
+        pd.setTitle("Signing In");
+        pd.setMessage("Please Wait");
+
+
         final Button loginBtn = findViewById(R.id.loginBtn);
+        final EditText loginId = findViewById(R.id.logInEmail);
+        final EditText loginPassword = findViewById(R.id.logInPassword);
+
+        loginId.addTextChangedListener(new Watcher(loginId));
+        loginPassword.addTextChangedListener(new Watcher(loginPassword));
+
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    String email = ((EditText)findViewById(R.id.logInEmail)).getText().toString();
-                    String password = ((EditText)findViewById(R.id.logInPassword)).getText().toString();
-//                    mauth.signInWithEmailAndPassword(email, password)
-//                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-//                            @Override
-//                            public void onComplete(@NonNull Task<AuthResult> task) {
-//                                if (task.isSuccessful()) {
-//                                    // Sign in success, update UI with the signed-in user's information
-//                                    Log.d(TAG, "signInWithEmail:success");
-//                                    FirebaseUser user = mAuth.getCurrentUser();
-//                                    updateUI(user);
-//                                } else {
-//                                    // If sign in fails, display a message to the user.
-//                                    Log.w(TAG, "signInWithEmail:failure", task.getException());
-//                                    Toast.makeText(EmailPasswordActivity.this, "Authentication failed.",
-//                                            Toast.LENGTH_SHORT).show();
-//                                    updateUI(null);
-//                                }
-//
-//                                // ...
-//                            }
-//                        });
-                    Log.d("Log", email + " : " + password);
+                String email = loginId.getText().toString();
+                String password = loginPassword.getText().toString();
+
+                if (email.isEmpty()){
+                    loginId.requestFocus();
+                    loginId.setError("Enter email id");
+                    return;
+                }
+                if (password.isEmpty()){
+                    loginPassword.requestFocus();
+                    loginPassword.setError("Enter Password ");
+                    return;
+                }
+
+                pd.show();
+
+                mauth.signInWithEmailAndPassword(email, password).addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Log.d("Log", "SignIn Success");
+                            if (mauth.getCurrentUser() != null && !mauth.getCurrentUser().isEmailVerified()) {
+                                Toast.makeText(getApplicationContext(), "Please verify Email", Toast.LENGTH_SHORT).show();
+                                pd.dismiss();
+                                return;
+                            } else {
+                                startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
+                                Toast.makeText(getApplicationContext(), "Welcome " + mauth.getCurrentUser().getDisplayName() + " !", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.d("Log", "Login Error: ", task.getException());
+                            if ( task.getException() instanceof FirebaseAuthInvalidUserException){
+                                loginId.setError("User does not exist");
+                                loginId.requestFocus();
+                                Toast.makeText(getApplicationContext(), "User id does not exist. Please sign up first",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            else if (task.getException() instanceof FirebaseAuthInvalidCredentialsException){
+                                Toast.makeText(getApplicationContext(), "Invalid Id or password. Please try again",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                Toast.makeText(getApplicationContext(), "Authentication failed. Please try again later",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        pd.dismiss();
+                        loginId.clearFocus();
+                        loginPassword.clearFocus();
+                    }
+                });
             }
         });
 
@@ -62,8 +117,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void onStart(){
+    @Override
+    public void onStart(){      // todo: Add a splash screen on startup
         super.onStart();
-        FirebaseUser currentUser = mauth.getCurrentUser();
+
+        if(mauth.getCurrentUser() != null && mauth.getCurrentUser().isEmailVerified()){
+            Log.d("Log", "Logging User in : " + mauth.getCurrentUser().getDisplayName() + " " + mauth.getCurrentUser().getEmail());
+            startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
+        }
     }
 }
