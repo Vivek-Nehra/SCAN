@@ -121,7 +121,7 @@ public class ScannerActivity extends AppCompatActivity {
                                             // to be commented after testing.
                                             textScan.setText(ipvalue);
 
-                                            System.out.println("BAZINGAA");
+//                                            System.out.println("BAZINGAA");
                                             cameraSource.stop();
                                         }
                                     }
