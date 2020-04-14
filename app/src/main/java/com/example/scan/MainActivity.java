@@ -5,14 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.os.Handler;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.SingleLineTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.scan.util.Watcher;
@@ -22,14 +23,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
-import com.google.firebase.auth.FirebaseUser;
-
-import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mauth;
     private ProgressDialog pd;
+    private Toast toast = null;
+    private boolean doublePressToExit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         pd.setTitle("Signing In");
         pd.setMessage("Please Wait");
 
+        toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
 
         final Button loginBtn = findViewById(R.id.loginBtn);
         final EditText loginId = findViewById(R.id.logInEmail);
@@ -49,6 +50,20 @@ public class MainActivity extends AppCompatActivity {
 
         loginId.addTextChangedListener(new Watcher(loginId));
         loginPassword.addTextChangedListener(new Watcher(loginPassword));
+
+        findViewById(R.id.togglePassword).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (loginPassword.getTransformationMethod() instanceof  PasswordTransformationMethod) {
+                    loginPassword.setTransformationMethod(new SingleLineTransformationMethod());
+                    ((ImageView)findViewById(R.id.togglePassword)).setImageResource(R.drawable.baseline_visibility_off_24);
+                }
+                else {
+                    loginPassword.setTransformationMethod(new PasswordTransformationMethod());
+                    ((ImageView)findViewById(R.id.togglePassword)).setImageResource(R.drawable.baseline_visibility_24);
+                }
+                loginPassword.setSelection(loginPassword.getText().length());
+        }});
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,5 +140,30 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Log", "Logging User in : " + mauth.getCurrentUser().getDisplayName() + " " + mauth.getCurrentUser().getEmail());
             startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
         }
+    }
+
+    @Override
+    public void onBackPressed(){        // todo: Check working after adding multiple activites to the activity stack
+        if (doublePressToExit){
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+        doublePressToExit = true;
+        toast.setText("Press again to exit.");
+        toast.show();
+        new Handler().postDelayed(new Runnable(){
+            @Override
+            public void run(){
+                doublePressToExit = false;
+            }
+        }, 2000);
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        toast.cancel();
     }
 }

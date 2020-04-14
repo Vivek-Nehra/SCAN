@@ -21,18 +21,22 @@ import com.google.firebase.auth.FirebaseAuth;
 public class LoggedInActivity extends AppCompatActivity {
 
     private boolean doublePressToExit = false;
+    private Toast toast = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
         Log.d("Log", " UserName : " + FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+        toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
+
 
         (findViewById(R.id.signOut)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                finish();
             }
         });
 
@@ -61,14 +65,21 @@ public class LoggedInActivity extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
-        Toast.makeText(this, "Press again to exit.", Toast.LENGTH_SHORT).show();
         doublePressToExit = true;
+        toast.setText("Press again to exit.");
+        toast.show();
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run(){
                 doublePressToExit = false;
             }
         }, 2000);
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        toast.cancel();
     }
 
 }

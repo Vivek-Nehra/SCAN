@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".LoggedInActivity" />
         <activity android:name=".SignUpActivity" />
-        <activity android:name=".MainActivity" android:noHistory="true">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

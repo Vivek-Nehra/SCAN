@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.SingleLineTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.scan.util.Watcher;
@@ -54,6 +57,18 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         if (v.getId() == R.id.signUpBtn) {
             signUpUser(signUpEmail.getText().toString(), (signUpPassword.getText().toString()));
         }
+        if (v.getId() == R.id.togglePassword2){
+            if (signUpPassword.getTransformationMethod() instanceof PasswordTransformationMethod) {
+                signUpPassword.setTransformationMethod(new SingleLineTransformationMethod());
+                ((ImageView)findViewById(R.id.togglePassword)).setImageResource(R.drawable.baseline_visibility_off_24);
+            }
+            else {
+                signUpPassword.setTransformationMethod(new PasswordTransformationMethod());
+                ((ImageView)findViewById(R.id.togglePassword)).setImageResource(R.drawable.baseline_visibility_24);
+            }
+            signUpPassword.setSelection(signUpPassword.getText().length());
+        }
+
     }
 
     private void toastMessage(String message) {
