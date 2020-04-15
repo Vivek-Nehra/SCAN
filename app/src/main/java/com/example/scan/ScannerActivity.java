@@ -1,6 +1,8 @@
 package com.example.scan;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Camera;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -28,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class ScannerActivity extends AppCompatActivity {
 
@@ -58,13 +63,16 @@ public class ScannerActivity extends AppCompatActivity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 try {
-                    cameraSource.start(holder);
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(ScannerActivity.this, new String[] {Manifest.permission.CAMERA},
+                                50);
+                    }
+                    else{
+                    cameraSource.start(surfaceView.getHolder());
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-                catch (Exception e){
-                    TextView textView = (TextView)findViewById(R.id.textscan);
-                    textView.setText("Please check your camera permissions");
                 }
             }
 

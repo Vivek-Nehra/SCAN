@@ -1,19 +1,13 @@
 package com.example.scan;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,20 +34,13 @@ public class LoggedInActivity extends AppCompatActivity {
             }
         });
 
-        (findViewById(R.id.scanCode)).setOnClickListener(new View.OnClickListener() {
+        (findViewById(R.id.floatingActionButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ASyncT startHotspot = new ASyncT();
                 startHotspot.execute();
-                System.out.println("I am here yooo!");
-                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
-                        PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this, new String[] {Manifest.permission.CAMERA},
-                            50); }
-                else
-                    startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
-            }
-        });
+                startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
+        }});
     }
 
 

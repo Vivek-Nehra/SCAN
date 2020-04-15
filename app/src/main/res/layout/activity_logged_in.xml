@@ -8,15 +8,121 @@
 
     <TextView
         android:id="@+id/textView3"
-        android:layout_width="70dp"
-        android:layout_height="17dp"
-        android:text="Hola Senor"
+        android:layout_width="435dp"
+        android:layout_height="45dp"
+        android:background="@color/aquaBlue"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="Welcome"
+        android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.135" />
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView1"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/darkWhite"
+        app:layout_constraintBottom_toTopOf="@+id/signOut"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.111"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:layout_constraintVertical_bias="0.491">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:cropToPadding="false"
+                android:src="@drawable/cycle"
+                tools:layout_editor_absoluteX="37dp"
+                tools:layout_editor_absoluteY="193dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal"
+                android:text="Current Bike \n ------   " />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView2"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/darkWhite"
+        app:layout_constraintBottom_toTopOf="@+id/signOut"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cardView1"
+        app:layout_constraintTop_toBottomOf="@+id/textView3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:cropToPadding="false"
+                android:src="@drawable/baseline_location_on_24"
+                tools:layout_editor_absoluteX="234dp"
+                tools:layout_editor_absoluteY="277dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="Total Distance \n0km   "
+                tools:layout_editor_absoluteX="248dp"
+                tools:layout_editor_absoluteY="265dp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView3"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/darkWhite"
+        app:layout_constraintBottom_toTopOf="@+id/signOut"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cardView1"
+        app:layout_constraintTop_toBottomOf="@+id/cardView2">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:cropToPadding="false"
+                android:src="@drawable/baseline_explore_24"
+                tools:layout_editor_absoluteX="234dp"
+                tools:layout_editor_absoluteY="277dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="Previous History \n"
+                tools:layout_editor_absoluteX="248dp"
+                tools:layout_editor_absoluteY="265dp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
 
     <Button
         android:id="@+id/signOut"
@@ -29,16 +135,37 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3"
-        app:layout_constraintVertical_bias="0.434" />
+        app:layout_constraintVertical_bias="0.77" />
 
-    <Button
-        android:id="@+id/scanCode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Scan Code"
-        app:layout_constraintBottom_toTopOf="@+id/signOut"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="85dp"
+        android:layout_height="53dp"
+        android:backgroundTint="#1092F6"
+        android:clickable="true"
+        android:focusable="true"
+        android:tint="#FFFFFF"
+        app:fabCustomSize="53dp"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.961"
+        app:srcCompat="?attr/actionModeSelectAllDrawable" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:layout_width="417dp"
+        android:layout_height="47dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/floatingActionButton"
+        app:layout_constraintVertical_bias="1.0"
+        app:itemIconTint="@drawable/nav_item_color_state"
+        app:itemTextColor="@drawable/nav_item_color_state"
+        app:menu="@menu/dashboard_menu"
+/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

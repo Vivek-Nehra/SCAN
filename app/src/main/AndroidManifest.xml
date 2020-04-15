@@ -21,7 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ScannerActivity"/>
+        <activity android:name=".ScannerActivity" />
         <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="qrcode"/>
     </application>
