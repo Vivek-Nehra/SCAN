@@ -1,55 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/camerapreview"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="27dp"
+        android:layout_marginEnd="10dp"
+        android:text="QR CODE SCANNER"
+        android:textAlignment="gravity"
+        android:textColor="#3F51B5"
+        android:textColorHighlight="#2196F3"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <SurfaceView
         android:id="@+id/camerapreview"
-        android:layout_width="467dp"
-        android:layout_height="803dp"
+        android:layout_width="338dp"
+        android:layout_height="347dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="300dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.566"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/textscan"
-        android:layout_width="402dp"
-        android:layout_height="71dp"
+        android:layout_width="345dp"
+        android:layout_height="69dp"
         android:layout_below="@+id/camerapreview"
-        android:layout_marginStart="31dp"
-        android:layout_marginTop="562dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="172dp"
-        android:foregroundTint="#090606"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="76dp"
+        android:layout_marginEnd="10dp"
         android:gravity="center"
-        android:text="Focus on QR Code"
-        android:textColor="#009688"
-        android:textColorHighlight="#9C27B0"
-        android:textColorHint="#3F51B5"
-        android:textSize="36sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Please focus on QR Code"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.652"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/camerapreview"
         tools:ignore="MissingConstraints" />
-
-    <ImageView
-        android:id="@+id/imageView5"
-        android:layout_width="357dp"
-        android:layout_height="397dp"
-        android:layout_marginStart="54dp"
-        android:layout_marginTop="188dp"
-        android:layout_marginEnd="54dp"
-        android:layout_marginBottom="220dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/scanner3_foreground" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
