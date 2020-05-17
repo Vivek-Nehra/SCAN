@@ -44,13 +44,44 @@ public class LoggedInActivity extends AppCompatActivity {
                 System.out.println("I am here yooo!");
                 if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
                         PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this, new String[] {Manifest.permission.CAMERA},
-                            50); }
+                    ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this,
+                            new String[] {Manifest.permission.CAMERA},
+                            50);
+                }
                 else
                     startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
             }
         });
     }
+
+
+
+    ///////////////////////////////////////////
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 50: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    System.out.println("Permission denied by the user!!");
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
+    }
+    //////////////////////////////////////////
+
 
 
     @Override

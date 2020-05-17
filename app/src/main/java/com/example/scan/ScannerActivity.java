@@ -58,7 +58,9 @@ public class ScannerActivity extends AppCompatActivity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 try {
+                    System.out.println("HERE 1111");
                     cameraSource.start(holder);
+                    System.out.println("HERE 2222");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
