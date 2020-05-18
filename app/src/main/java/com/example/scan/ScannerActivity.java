@@ -1,14 +1,18 @@
 package com.example.scan;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
+import android.graphics.Rect;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,6 +33,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,10 +46,15 @@ public class ScannerActivity extends AppCompatActivity {
     private TextView textScan;
     private BarcodeDetector barcodeDetector;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
+
+
+        Camera.Parameters params;
+        Camera camera;
 
         // returns a reference to firebase Json tree.
         final DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
@@ -57,13 +67,15 @@ public class ScannerActivity extends AppCompatActivity {
         barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.QR_CODE).build();
         cameraSource = new CameraSource.Builder(this, barcodeDetector)
-                .setRequestedPreviewSize(640, 480).build();
+                .setRequestedPreviewSize(640, 480).setAutoFocusEnabled(true).build();
 
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 try {
+                    System.out.println("HERE 1111");
                     cameraSource.start(holder);
+                    System.out.println("HERE 2222");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -76,8 +88,7 @@ public class ScannerActivity extends AppCompatActivity {
 
             @Override
             public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
-            }
+                }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
