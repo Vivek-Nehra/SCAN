@@ -1,25 +1,20 @@
 package com.example.scan;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Rect;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.util.SparseArray;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -33,11 +28,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
 
 public class ScannerActivity extends AppCompatActivity {
 
@@ -45,6 +35,7 @@ public class ScannerActivity extends AppCompatActivity {
     private CameraSource cameraSource;
     private TextView textScan;
     private BarcodeDetector barcodeDetector;
+    private boolean processingScannedField;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -55,10 +46,12 @@ public class ScannerActivity extends AppCompatActivity {
 
         Camera.Parameters params;
         Camera camera;
+        processingScannedField = false;
 
         // returns a reference to firebase Json tree.
         final DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
         final DatabaseReference raspRef = rootRef.child("raspberries");
+
 
         // camera setup and qr code detection.
         surfaceView = (SurfaceView)findViewById(R.id.camerapreview);
@@ -73,9 +66,7 @@ public class ScannerActivity extends AppCompatActivity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 try {
-                    System.out.println("HERE 1111");
                     cameraSource.start(holder);
-                    System.out.println("HERE 2222");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -101,7 +92,7 @@ public class ScannerActivity extends AppCompatActivity {
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
-                System.out.println("Over");
+                Log.d("Scanner","Over");
             }
 
             @Override
@@ -109,17 +100,15 @@ public class ScannerActivity extends AppCompatActivity {
 
                 // When QRCode is detected.
                 final SparseArray<Barcode> qrCodes = detections.getDetectedItems();
-
                 // to get IP address corresponding to scanned QR Code.
-                if(qrCodes.size()!=0){
-
+                if(qrCodes.size()!=0 && !processingScannedField){
+                    processingScannedField = true;
                     textScan.post(new Runnable() {
                         @Override
                         public void run() {
                             Vibrator vibrator = (Vibrator)getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
                             assert vibrator != null;
-                            vibrator.vibrate(1000);
-                            textScan.setText(qrCodes.valueAt(0).displayValue);
+                            vibrator.vibrate(100);
 
                             Query ipquery = raspRef.child("configurations");
 
@@ -137,18 +126,20 @@ public class ScannerActivity extends AppCompatActivity {
                                         // Obtained IP address
                                         if(piname.equals(qrcode)) {
                                             String ipvalue = p.getValue(String.class);
-                                            // to be commented after testing.
-                                            textScan.setText(ipvalue);
-
-//                                            System.out.println("BAZINGAA");
+                                            processingScannedField = false;
                                             cameraSource.stop();
+                                            textScan.setText("Bike Found");
+                                            Intent returnData = new Intent();
+                                            returnData.putExtra("IP", ipvalue);
+                                            setResult(RESULT_OK, returnData);
+                                            finish();
                                         }
                                     }
                                 }
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                                    setResult(RESULT_CANCELED);
                                 }
                             });
                         }
@@ -156,5 +147,13 @@ public class ScannerActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        // When the user hits the back button set the resultCode
+        // as Activity.RESULT_CANCELED to indicate a failure
+        setResult(RESULT_CANCELED);
+        super.onBackPressed();
     }
 }

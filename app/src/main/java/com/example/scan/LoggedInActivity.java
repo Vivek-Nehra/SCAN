@@ -14,12 +14,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoggedInActivity extends AppCompatActivity {
 
     private boolean doublePressToExit = false;
     private Toast toast = null;
+    private int QR_CODE_SCAN = 10;
+    private String bikeIP = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,18 +44,21 @@ public class LoggedInActivity extends AppCompatActivity {
         (findViewById(R.id.floatingActionButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ASyncT startHotspot = new ASyncT();
-                startHotspot.execute();
-//                startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
-                System.out.println("I am here yooo!");
-                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
-                        PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this,
-                            new String[]{Manifest.permission.CAMERA},
-                            50);
-                } else
-
-                    startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
+                if (bikeIP == null) {
+                    ASyncT startHotspot = new ASyncT();
+                    startHotspot.execute();
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this,
+                                new String[]{Manifest.permission.CAMERA},
+                                50);
+                    } else {
+                        startActivityForResult(new Intent(getApplicationContext(), ScannerActivity.class), QR_CODE_SCAN);
+                    }
+                } else{
+                    Log.d("Bike", bikeIP);
+                    Snackbar.make(findViewById(R.id.constraintLayout), "You already have rented a bike.", Snackbar.LENGTH_LONG).show();
+                }
             }});
     }
 
@@ -68,17 +74,27 @@ public class LoggedInActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // camera-related task you need to do.
-                    startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
+                    startActivityForResult(new Intent(getApplicationContext(), ScannerActivity.class), QR_CODE_SCAN);
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    System.out.println("Permission denied by the user!!");
+                    Log.d("Scanner","Permission denied by the user!!");
                 }
                 return;
             }
+        }
+    }
 
-            // other 'case' lines to check for other
-            // permissions this app might request.
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if (requestCode == QR_CODE_SCAN){
+            if (resultCode == RESULT_OK){
+                bikeIP = data.getStringExtra("IP");
+                Log.d("Scanner", bikeIP);
+                startActivity(new Intent(getApplicationContext(), BikeControllerActivity.class));
+            } else {
+                Log.d("Scanner", "QR code not obtained");
+            }
         }
     }
 
