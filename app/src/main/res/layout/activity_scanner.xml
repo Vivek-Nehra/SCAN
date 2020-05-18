@@ -38,19 +38,5 @@
         app:layout_constraintVertical_bias="1.0"
         tools:ignore="MissingConstraints" />
 
-    <ImageView
-        android:id="@+id/imageView5"
-        android:layout_width="274dp"
-        android:layout_height="345dp"
-        android:layout_marginStart="95dp"
-        android:layout_marginTop="230dp"
-        android:layout_marginEnd="96dp"
-        android:layout_marginBottom="230dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/scanner3_foreground" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
