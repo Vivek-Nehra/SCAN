@@ -63,15 +63,15 @@ public class ScannerActivity extends AppCompatActivity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 try {
-                    System.out.println("HERE 1111");
-                    cameraSource.start(holder);
-                    System.out.println("HERE 2222");
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(ScannerActivity.this, new String[] {Manifest.permission.CAMERA},
+                                50);
+                    }
+                    else{
+                    cameraSource.start(surfaceView.getHolder());
+                    }
                 } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                catch (Exception e){
-                    TextView textView = (TextView)findViewById(R.id.textscan);
-                    textView.setText("Please check your camera permissions");
                     e.printStackTrace();
                 }
             }
