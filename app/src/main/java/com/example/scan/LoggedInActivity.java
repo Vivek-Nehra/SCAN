@@ -51,6 +51,7 @@ public class LoggedInActivity extends AppCompatActivity {
                             new String[]{Manifest.permission.CAMERA},
                             50);
                 } else
+
                     startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
             }});
     }
@@ -80,7 +81,6 @@ public class LoggedInActivity extends AppCompatActivity {
             // permissions this app might request.
         }
     }
-
 
 
     @Override
