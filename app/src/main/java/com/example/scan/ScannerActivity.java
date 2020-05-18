@@ -87,6 +87,8 @@ public class ScannerActivity extends AppCompatActivity {
             }
         });
 
+
+
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
