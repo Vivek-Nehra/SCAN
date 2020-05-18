@@ -1,23 +1,29 @@
 package com.example.scan;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.scan.util.CreateHTTPRequest;
+import com.example.scan.util.HotspotManager;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class LoggedInActivity extends AppCompatActivity {
+public class LoggedInActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener {
 
     private boolean doublePressToExit = false;
     private Toast toast = null;
@@ -28,25 +34,33 @@ public class LoggedInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
-        Log.d("Log", " UserName : " + FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
 
+        final HotspotManager hotspot = new HotspotManager((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE),this);
 
         (findViewById(R.id.signOut)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                finish();
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
+                        PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            50);
+                } else {
+                    hotspot.turnOnHotspot();
+                }
+//                FirebaseAuth.getInstance().signOut();
+//                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+//                finish();
             }
         });
 
         (findViewById(R.id.floatingActionButton)).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view) {        // todo : Add all permissions at app startup
                 if (bikeIP == null) {
-                    ASyncT startHotspot = new ASyncT();
-                    startHotspot.execute();
+                    CreateHTTPRequest request = new CreateHTTPRequest();
+                    request.execute();
                     if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
                             PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this,
@@ -62,13 +76,18 @@ public class LoggedInActivity extends AppCompatActivity {
             }});
     }
 
+    @Override
+    public void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration){
+        Log.d("Hotspot", "Hotspot Started");
+    }
+
+
 
     // Checking the result of Permission Request
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case 50: {
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if ( requestCode == 50) {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -80,8 +99,6 @@ public class LoggedInActivity extends AppCompatActivity {
                     // functionality that depends on this permission.
                     Log.d("Scanner","Permission denied by the user!!");
                 }
-                return;
-            }
         }
     }
 
@@ -90,7 +107,7 @@ public class LoggedInActivity extends AppCompatActivity {
         if (requestCode == QR_CODE_SCAN){
             if (resultCode == RESULT_OK){
                 bikeIP = data.getStringExtra("IP");
-                Log.d("Scanner", bikeIP);
+                Log.d("Scanner", bikeIP != null ? bikeIP : "Empty");
                 startActivity(new Intent(getApplicationContext(), BikeControllerActivity.class));
             } else {
                 Log.d("Scanner", "QR code not obtained");
@@ -124,13 +141,4 @@ public class LoggedInActivity extends AppCompatActivity {
         toast.cancel();
     }
 
-}
-
-
-class ASyncT extends AsyncTask<Void, Void, Void> {
-    @Override
-    protected Void doInBackground(Void ...params){
-        // todo : Add logic to start hotspot with random username and password
-        return null;
-    }
 }

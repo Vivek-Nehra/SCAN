@@ -16,7 +16,7 @@ public class HotspotManager {
 
     public interface OnHotspotEnabledListener{
         void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration);
-    }8
+    }
 
     //call with Hotspotmanager(getApplicationContext().getSystemService(Context.WIFI_SERVICE),this) in an activity that implements the Hotspotmanager.OnHotspotEnabledListener
     public HotspotManager(WifiManager wifiManager, OnHotspotEnabledListener onHotspotEnabledListener) {
