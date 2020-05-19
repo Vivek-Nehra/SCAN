@@ -1,11 +1,106 @@
 package com.example.scan.util;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
-public class CreateHTTPRequest extends AsyncTask<Void, Void, Void> {
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
+
+public class CreateHTTPRequest extends AsyncTask<String, String, String> {
+
+
+
     @Override
-    protected Void doInBackground(Void... params) {
-        // todo : Add logic to start hotspot with random username and password
-        return null;
+    protected String doInBackground(String... params) {
+        String name = params[0];
+        String pass = params[1];
+        String bikeIP = params[2];
+
+
+        try {
+            URL url = new URL("https://scan-app2020.herokuapp.com/scanapp/receive");
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+
+            Map<String, String> arguments = new HashMap<>();
+            arguments.put("name", name);
+            arguments.put("pass", pass);
+            arguments.put("ip", bikeIP);
+            StringJoiner sj = new StringJoiner("&");
+
+            for (Map.Entry<String, String> entry : arguments.entrySet())
+                sj.add(URLEncoder.encode(entry.getKey(), "UTF-8") + "="
+                        + URLEncoder.encode(entry.getValue(), "UTF-8"));
+            byte[] out = sj.toString().getBytes(StandardCharsets.UTF_8);
+            int length = out.length;
+
+            http.setFixedLengthStreamingMode(length);
+            http.setRequestMethod("POST");
+            http.setDoOutput(true);
+            http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            http.connect();
+
+            try (OutputStream os = http.getOutputStream()) {
+                os.write(out);
+                os.flush();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+            int statusCode = http.getResponseCode();
+            Log.d("StatusCode","Value: " + statusCode);
+            try {
+                InputStream in = new BufferedInputStream(http.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+
+                Log.d("test", "result from server: " + result.toString());
+                return result.toString();
+
+            } catch (IOException e) {
+                if(statusCode == 500) {
+                    InputStream in = new BufferedInputStream(http.getErrorStream());
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+
+                    Log.d("test2", "result from server: " + result.toString());
+                    return result.toString();
+                }
+                e.printStackTrace();
+            } finally {
+                if (http != null) {
+                    http.disconnect();
+                }
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            Log.d("error2","Improper parameters");
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("status","\n\n\nSuccess\n\n\n");
+        return "{\"message\": \"Try Again.\"}";
     }
 }
