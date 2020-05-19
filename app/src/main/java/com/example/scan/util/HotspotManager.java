@@ -7,26 +7,22 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
-import android.util.Log;
-import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.example.scan.LoggedInActivity;
 
 
 public class HotspotManager {
+
     private final WifiManager wifiManager;
     private final OnHotspotEnabledListener onHotspotEnabledListener;
     private WifiManager.LocalOnlyHotspotReservation mReservation;
-    private Toast toast = null;
 
     public interface OnHotspotEnabledListener{
         void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration);
     }
 
-    //call with Hotspotmanager(getApplicationContext().getSystemService(Context.WIFI_SERVICE),this) in an activity that implements the Hotspotmanager.OnHotspotEnabledListener
+
     public HotspotManager(WifiManager wifiManager, OnHotspotEnabledListener onHotspotEnabledListener) {
         this.wifiManager = wifiManager;
         this.onHotspotEnabledListener = onHotspotEnabledListener;
@@ -53,7 +49,7 @@ public class HotspotManager {
             public void onFailed(int reason) {
                 super.onFailed(reason);
                 if (reason == 3) {
-                    Log.d("msg", "reason 3 yayyyy");
+
                     AlertDialog alertDialog = new AlertDialog.Builder(context).create();
                     alertDialog.setTitle("Alert");
                     alertDialog.setMessage("Disable Hotspot to continue");
@@ -64,7 +60,7 @@ public class HotspotManager {
                                 }
                             });
                     alertDialog.show();
-//                    toast = Toast.makeText(context, "Disable Hotspot for App to Work", Toast.LENGTH_SHORT);
+
                 }
             }
         }, new Handler());

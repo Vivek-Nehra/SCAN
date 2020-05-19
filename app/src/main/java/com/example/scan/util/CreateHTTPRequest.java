@@ -2,7 +2,6 @@ package com.example.scan.util;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,8 +19,6 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 public class CreateHTTPRequest extends AsyncTask<String, String, String> {
-
-
 
     @Override
     protected String doInBackground(String... params) {
@@ -59,8 +56,11 @@ public class CreateHTTPRequest extends AsyncTask<String, String, String> {
                 System.out.println(e.getMessage());
             }
             int statusCode = http.getResponseCode();
+
             Log.d("StatusCode","Value: " + statusCode);
+
             try {
+
                 InputStream in = new BufferedInputStream(http.getInputStream());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 StringBuilder result = new StringBuilder();
@@ -69,7 +69,6 @@ public class CreateHTTPRequest extends AsyncTask<String, String, String> {
                     result.append(line);
                 }
 
-                Log.d("test", "result from server: " + result.toString());
                 return result.toString();
 
             } catch (IOException e) {
@@ -82,7 +81,6 @@ public class CreateHTTPRequest extends AsyncTask<String, String, String> {
                         result.append(line);
                     }
 
-                    Log.d("test2", "result from server: " + result.toString());
                     return result.toString();
                 }
                 e.printStackTrace();
@@ -95,12 +93,11 @@ public class CreateHTTPRequest extends AsyncTask<String, String, String> {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
-            Log.d("error2","Improper parameters");
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("status","\n\n\nSuccess\n\n\n");
+
         return "{\"message\": \"Try Again.\"}";
     }
 }

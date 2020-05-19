@@ -85,6 +85,7 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
         Log.d("Hotspot", "Hotspot Started");
         hotspotPassword = wifiConfiguration.preSharedKey;
         hotspotName = wifiConfiguration.SSID;
+
         Log.d("password", hotspotPassword);
         Log.d("ssid", hotspotName);
 
@@ -96,12 +97,12 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
     private class Request extends CreateHTTPRequest {
         @Override
         protected void onPostExecute(String result) {
-            // Activity 1 GUI stuff
-            Log.d("here in activity",result);
+
             try {
                 JSONObject resultJson = new JSONObject(result);
                 result = resultJson.getString("message");
-                Log.d("decoded",result);
+                Log.d("Result of POST: ",result);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
