@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class CreateHTTPRequest extends AsyncTask<String, String, String> {
+public class CreateHTTPPostRequest extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... params) {
@@ -97,7 +97,6 @@ public class CreateHTTPRequest extends AsyncTask<String, String, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return "{\"message\": \"Try Again.\"}";
+        return "{\"message\": \"Error. Try Again.\"}";
     }
 }

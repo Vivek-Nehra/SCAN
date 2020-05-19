@@ -109,6 +109,7 @@ public class ScannerActivity extends AppCompatActivity {
                             Vibrator vibrator = (Vibrator)getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
                             assert vibrator != null;
                             vibrator.vibrate(100);
+                            textScan.setText("Processing QR Code");
 
                             Query ipquery = raspRef.child("configurations");
 
@@ -116,9 +117,7 @@ public class ScannerActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                                     Iterable<DataSnapshot> dataSnapshotIterable = dataSnapshot.getChildren();
-
                                     for (DataSnapshot p : dataSnapshotIterable) {
                                         String piname = p.getKey();
                                         String qrcode = qrCodes.valueAt(0).displayValue;
@@ -133,12 +132,16 @@ public class ScannerActivity extends AppCompatActivity {
                                             returnData.putExtra("IP", ipvalue);
                                             setResult(RESULT_OK, returnData);
                                             finish();
+                                            return;
                                         }
                                     }
+                                    processingScannedField = false;
+                                    textScan.setText("Focus on QR Code");
                                 }
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    processingScannedField = false;
                                     setResult(RESULT_CANCELED);
                                 }
                             });

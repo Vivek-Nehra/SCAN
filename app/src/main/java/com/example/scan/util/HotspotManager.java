@@ -7,6 +7,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
@@ -20,6 +21,7 @@ public class HotspotManager {
 
     public interface OnHotspotEnabledListener{
         void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration);
+
     }
 
 
@@ -30,40 +32,42 @@ public class HotspotManager {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void turnOnHotspot(final Context context) {
-        wifiManager.startLocalOnlyHotspot(new WifiManager.LocalOnlyHotspotCallback() {
+        if (mReservation == null) {
+            wifiManager.startLocalOnlyHotspot(new WifiManager.LocalOnlyHotspotCallback() {
 
-            @Override
-            public void onStarted(WifiManager.LocalOnlyHotspotReservation reservation) {
-                super.onStarted(reservation);
-                mReservation = reservation;
-                onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
-
-            }
-
-            @Override
-            public void onStopped() {
-                super.onStopped();
-            }
-
-            @Override
-            public void onFailed(int reason) {
-                super.onFailed(reason);
-                if (reason == 3) {
-
-                    AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-                    alertDialog.setTitle("Alert");
-                    alertDialog.setMessage("Disable Hotspot to continue");
-                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.show();
+                @Override
+                public void onStarted(WifiManager.LocalOnlyHotspotReservation reservation) {
+                    super.onStarted(reservation);
+                    mReservation = reservation;
+                    onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
 
                 }
-            }
-        }, new Handler());
+
+                @Override
+                public void onStopped() {
+                    super.onStopped();
+                }
+
+                @Override
+                public void onFailed(int reason) {
+                    super.onFailed(reason);
+                    if (reason == 3) {
+                        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                        alertDialog.setTitle("Alert");
+                        alertDialog.setMessage("Disable Hotspot and Try again");
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
+            }, new Handler());
+        } else{
+            onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
