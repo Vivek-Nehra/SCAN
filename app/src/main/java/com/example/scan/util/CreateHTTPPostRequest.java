@@ -25,6 +25,7 @@ public class CreateHTTPPostRequest extends AsyncTask<String, Void, String> {
         String name = params[0];
         String pass = params[1];
         String bikeIP = params[2];
+        String androidIP = params[3];
 
 
         try {
@@ -34,7 +35,8 @@ public class CreateHTTPPostRequest extends AsyncTask<String, Void, String> {
             Map<String, String> arguments = new HashMap<>();
             arguments.put("name", name);
             arguments.put("pass", pass);
-            arguments.put("ip", bikeIP);
+            arguments.put("bikeIP", bikeIP);
+            arguments.put("androidIP", androidIP);
             StringJoiner sj = new StringJoiner("&");
 
             for (Map.Entry<String, String> entry : arguments.entrySet())
@@ -90,10 +92,6 @@ public class CreateHTTPPostRequest extends AsyncTask<String, Void, String> {
                 }
             }
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -15,11 +15,13 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.scan.util.CreateHTTPPostRequest;
+import com.example.scan.util.CreateHTTPGetRequest;
 import com.example.scan.util.HotspotManager;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,16 +29,23 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+
 public class LoggedInActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener {
 
     private boolean doublePressToExit = false;
     private Toast toast = null;
     private int QR_CODE_SCAN = 10;
     private String bikeIP = null;
+    private String androidIP = null;
     private String hotspotName = null;
     private String hotspotPassword = null;
     private HotspotManager hotspot;
-    private PostRequest request;
+    private PostRequest postRequest;
+    private GetRequest getRequest;
     private ProgressDialog pd;
 
     @Override
@@ -53,9 +62,14 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
         (findViewById(R.id.signOut)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                finish();
+
+//                FirebaseAuth.getInstance().signOut();
+//                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+//                finish();
+                if (androidIP != null) {
+                    getRequest = new GetRequest();
+                    getRequest.execute(androidIP);
+                }
             }
 
         });
@@ -83,21 +97,47 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
     public void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration){
         if (enabled) {
             Log.d("Hotspot", "Hotspot Started");
+            Log.d("Hotspot", "Config: " + wifiConfiguration);
             hotspotPassword = wifiConfiguration.preSharedKey;
             hotspotName = wifiConfiguration.SSID;
 
             Log.d("Hotspot", "Password: " + hotspotPassword);
             Log.d("Hotspot", "ID: " + hotspotName);
 
+            androidIP = getDeviceIP();
+            Log.d("Hotspot", "My IP: " + androidIP);
+
+
             if (bikeIP != null) {
-                request = new PostRequest();
-                request.execute(hotspotName, hotspotPassword, bikeIP);
+                postRequest = new PostRequest();
+                postRequest.execute(hotspotName, hotspotPassword, bikeIP, androidIP);
             }
         }
         else{
             Log.d("Hotspot", "Hotspot turned off");
         }
+
     }
+
+    public String getDeviceIP() {
+        try {
+            for (Enumeration<NetworkInterface> ni = NetworkInterface.getNetworkInterfaces(); ni.hasMoreElements();) {
+                NetworkInterface interfaceVar = ni.nextElement();
+                for (Enumeration<InetAddress> enumIP = interfaceVar.getInetAddresses(); enumIP.hasMoreElements();) {
+                    InetAddress address = enumIP.nextElement();
+                    if (!address.isLoopbackAddress()) {
+                        String deviceIP = Formatter.formatIpAddress(address.hashCode());
+                        return deviceIP;
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            Log.e("TAG", ex.toString());
+        }
+        return null;
+    }
+
+
     private class PostRequest extends CreateHTTPPostRequest {
         @Override
         protected void onPreExecute(){
@@ -122,6 +162,38 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
                     Log.d("Request", "Error sending request");
                     bikeIP = null;
                     hotspot.turnOffHotspot();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class GetRequest extends CreateHTTPGetRequest {
+        @Override
+        protected void onPreExecute(){
+            if (isCancelled()){
+                return;
+            }
+            pd.show();
+        }
+        @Override
+        protected void onPostExecute(String result) {
+            pd.dismiss();
+            if (isCancelled()){
+                return;
+            }
+            try {
+                JSONObject resultJson = new JSONObject(result);
+                result = resultJson.getString("message");
+                Log.d("Request",result);
+                if (result.contains("Error")){
+                    Log.d("Request", "Error receiving status");
+                }
+                else {
+
+                    toast = Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT);
+                    toast.show();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -194,8 +266,11 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
     @Override
     public void onStop(){
         super.onStop();
-        if (request != null){
-            request.cancel(true);
+        if (postRequest != null){
+            postRequest.cancel(true);
+        }
+        if (getRequest != null){
+            getRequest.cancel(true);
         }
     }
 
@@ -203,6 +278,12 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
     public void onDestroy(){
         super.onDestroy();
         toast.cancel();
+        if (postRequest != null){
+            postRequest.cancel(true);
+        }
+        if (getRequest != null){
+            getRequest.cancel(true);
+        }
     }
 
 }

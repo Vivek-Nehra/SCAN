@@ -4,12 +4,12 @@ import time
 from wifi_connect import connect_to_wifi
 
 hostname = socket.gethostname()    
-my_ip = socket.gethostbyname(hostname)    
+my_ip = socket.gethostbyname(hostname)
 # print("Your Computer Name is:" + hostname)    
-# print("Your Computer IP Address is:" + my_ip) 
+# print("Your Computer IP Address is:" + my_ip)
 
 url = 'https://scan-app2020.herokuapp.com/scanapp/connect'
-param = {'my_ip': '192.168.43.21'}
+param = {'bikeIP': '192.168.43.21'}
 
 while True:
     response = requests.get(url = url, params = param)
@@ -25,11 +25,17 @@ while True:
 
 ssid = str(data['hotspot_name'])
 psk = str(data['pass'])
-print(ssid,psk)
-establish_connection = connect_to_wifi(ssid,psk)
+android_ip = str(data['androidIP'])
+print(ssid, psk, android_ip)
+
+establish_connection = connect_to_wifi(ssid, psk)
 if establish_connection == True:
     print ("Connected to WIFI !")
     # Logic to create Socket connection
 else:
     print ("Error Found")
+    url = 'https://scan-app2020.herokuapp.com/scanapp/bike_status'
+    param = {'androidIP': android_ip, 'status': 'can't connect}
+    response = requests.get(url = url, params = param)
+
     # Logic to Send Request to server of failed connection
