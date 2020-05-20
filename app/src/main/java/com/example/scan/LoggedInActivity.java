@@ -29,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -124,9 +125,10 @@ public class LoggedInActivity extends AppCompatActivity implements HotspotManage
             for (Enumeration<NetworkInterface> ni = NetworkInterface.getNetworkInterfaces(); ni.hasMoreElements();) {
                 NetworkInterface interfaceVar = ni.nextElement();
                 for (Enumeration<InetAddress> enumIP = interfaceVar.getInetAddresses(); enumIP.hasMoreElements();) {
-                    InetAddress address = enumIP.nextElement();
-                    if (!address.isLoopbackAddress()) {
-                        String deviceIP = Formatter.formatIpAddress(address.hashCode());
+                    InetAddress myaddress = enumIP.nextElement();
+                    if (!myaddress.isLoopbackAddress() && myaddress instanceof Inet4Address) {
+                        //String deviceIP = Formatter.formatIpAddress(myaddress.hashCode());
+                        String deviceIP = myaddress.getHostAddress();
                         return deviceIP;
                     }
                 }
