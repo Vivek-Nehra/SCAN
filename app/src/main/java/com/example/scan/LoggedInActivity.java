@@ -53,7 +53,7 @@ public class LoggedInActivity extends AppCompatActivity {
                 } else
 
                     startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
-            }});
+                }});
     }
 
 
