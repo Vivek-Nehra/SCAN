@@ -6,4 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".BikeControllerActivity">
 
+    <include layout="@layout/check_connection"/>
+    <include layout="@layout/bike_control_dashboard"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

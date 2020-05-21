@@ -128,9 +128,10 @@ public class ScannerActivity extends AppCompatActivity {
                                             processingScannedField = false;
                                             cameraSource.stop();
                                             textScan.setText("Bike Found");
-                                            Intent returnData = new Intent();
-                                            returnData.putExtra("IP", ipvalue);
-                                            setResult(RESULT_OK, returnData);
+
+                                            Intent scannedData = new Intent(getApplicationContext(), BikeControllerActivity.class);
+                                            scannedData.putExtra("IP", ipvalue);
+                                            startActivity(scannedData);
                                             finish();
                                             return;
                                         }
@@ -142,7 +143,6 @@ public class ScannerActivity extends AppCompatActivity {
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError) {
                                     processingScannedField = false;
-                                    setResult(RESULT_CANCELED);
                                 }
                             });
                         }
@@ -150,13 +150,5 @@ public class ScannerActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        // When the user hits the back button set the resultCode
-        // as Activity.RESULT_CANCELED to indicate a failure
-        setResult(RESULT_CANCELED);
-        super.onBackPressed();
     }
 }

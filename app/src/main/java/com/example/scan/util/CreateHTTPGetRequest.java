@@ -25,7 +25,7 @@ public class CreateHTTPGetRequest extends AsyncTask<String, Void, String>{
 
             for (int i=0; i<10;i++) {
                 if (isCancelled()){
-                    return null;
+                    return "{\"message\": \"Try Again.\"}";
                 }
                 HttpURLConnection http = (HttpURLConnection) url.openConnection();
                 http.connect();
@@ -39,7 +39,6 @@ public class CreateHTTPGetRequest extends AsyncTask<String, Void, String>{
                     }
                     SystemClock.sleep(3000);
                 }
-
                 else {
                     try {
 
@@ -67,6 +66,6 @@ public class CreateHTTPGetRequest extends AsyncTask<String, Void, String>{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "{\"message\": \"Error. Try Again.\"}";
+        return "{\"message\": \"Try Again.\"}";
     }
 }
