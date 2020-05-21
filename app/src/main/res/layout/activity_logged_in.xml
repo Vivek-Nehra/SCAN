@@ -155,9 +155,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+
         app:layout_constraintTop_toBottomOf="@+id/floatingActionButton"
         app:layout_constraintVertical_bias="1.0"
         app:menu="@menu/dashboard_menu" />
+
+<!--        app:layout_constraintTop_toBottomOf="@+id/textView3"-->
+<!--        app:layout_constraintVertical_bias="0.63" />-->
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
@@ -173,7 +178,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.961"
+        app:layout_constraintVertical_bias="0.858"
         app:srcCompat="?attr/actionModeSelectAllDrawable" />
 
 
