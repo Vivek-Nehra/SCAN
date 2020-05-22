@@ -13,7 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,8 +30,12 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import static com.example.scan.util.Constants.CONNECTION_ESTABLISHED;
+import static com.example.scan.util.Constants.CONNECTION_FAILED;
+import static com.example.scan.util.Constants.CONNECTION_UNKNOWN;
+import static com.example.scan.util.Constants.connectionEstablished;
+
 public class BikeControllerActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener {
-    private int CONNECTION_UNKNOWN = 0, CONNECTION_ESTABLISHED = 1, CONNECTION_FAILED = -1;
     private ConstraintLayout bikeDashboard, checkConnection;
     private String bikeIP;
     private HotspotManager hotspot;
@@ -42,15 +46,16 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private PostRequest postRequest;
     private GetRequest getRequest;
     private Toast toast = null;
-    private int connectionEstablished = CONNECTION_UNKNOWN;
+    private Handler updateUI;
+    private Runnable runHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_controller);
 
-        bikeDashboard = findViewById(R.id.check_connection);
-        checkConnection = findViewById(R.id.bike_control_dashboard);
+        checkConnection = findViewById(R.id.check_connection);
+        bikeDashboard = findViewById(R.id.bike_control_dashboard);
 
         hotspot = new HotspotManager((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE),this);
 
@@ -62,19 +67,19 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         (findViewById(R.id.retryButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                connectionEstablished = CONNECTION_UNKNOWN;
                 finish();
                 overridePendingTransition(0, 0);
                 startActivity(getIntent());
                 overridePendingTransition(0, 0);
             }
         });
-
     }
 
     @Override
     public void onStart(){
         super.onStart();
-        bikeDashboard.setVisibility(View.VISIBLE);
+        bikeDashboard.setVisibility(View.GONE);
         checkConnection.setVisibility(View.GONE);
 
         bikeIP = getIntent().getStringExtra("IP");
@@ -129,38 +134,47 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             getRequest = new GetRequest();
             getRequest.execute(androidIP);
 
-            final Handler updateUI= new Handler();
-            updateUI.postDelayed(new Runnable() {
+            checkConnection.setVisibility(View.VISIBLE);
+            final ImageView retry = findViewById(R.id.retryButton);
+            retry.setVisibility(View.INVISIBLE);
+            bikeDashboard.setVisibility(View.INVISIBLE);
+
+            updateUI= new Handler();
+            runHandler = new Runnable() {
                 private int count = 0;
                 @Override
                 public void run() {
                     TextView connectingText = findViewById(R.id.connectionTextBox);
-                    ImageButton retry = findViewById(R.id.retryButton);
-                    retry.setVisibility(View.INVISIBLE);
+                    Log.d("Bike", "Running Handler" + count);
                     if (connectionEstablished == CONNECTION_UNKNOWN) {
                         String text = "Connecting ";
                         for(int j=0;j<count%3 +1;j++)   text += ".";
                         connectingText.setText(text);
                         count++;
                         if (count == 30) {
+                            cancelAsyncTasks();
                             connectingText.setText("Timeout occurred. Retry.");
+                            Log.d("Bike", "Timeoout");
                             retry.setVisibility(View.VISIBLE);
-                            updateUI.removeCallbacks(this);
+                        }
+                        else {
+                            updateUI.postDelayed(this,1000);
                         }
                     }
                     if (connectionEstablished == CONNECTION_FAILED) {
-                        connectingText.setText("Connection Failed. Retry.");
+                        connectingText.setText("Connection Failed. Make Sure you are close to the bike.");
+                        Log.d("Bike", "Not Connected.");
                         retry.setVisibility(View.VISIBLE);
                     }
                     if (connectionEstablished == CONNECTION_ESTABLISHED) {
                         cancelAsyncTasks();
                         connectingText.setText("Connected ... ");
+                        Log.d("Bike", "Connected");
                         retry.setVisibility(View.INVISIBLE);
-                        updateUI.removeCallbacks(this);
                     }
                 }
-            },1000);
-
+            };
+            updateUI.post(runHandler);
         }
     }
 
@@ -207,14 +221,13 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         @Override
         protected void onPostExecute(String result) {
             if (isCancelled()){
-                Log.d("Request", " Get Async Task cancelled");
                 return;
             }
             try {
                 JSONObject resultJson = new JSONObject(result);
                 result = resultJson.getString("message");
                 Log.d("Request",result);
-                if (result.contains("Error")){
+                if (result.contains("Can't connect")){
                     Log.d("Request", "Not able to connect");
                     connectionEstablished = CONNECTION_FAILED;
                 }
@@ -237,6 +250,9 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     public void onStop(){
         super.onStop();
         cancelAsyncTasks();
+        if (updateUI != null && runHandler != null){
+            updateUI.removeCallbacks(runHandler);
+        }
         toast.cancel();
     }
 
@@ -244,6 +260,9 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     public void onDestroy(){
         super.onDestroy();
         cancelAsyncTasks();
+        if (updateUI != null && runHandler != null){
+            updateUI.removeCallbacks(runHandler);
+        }
         toast.cancel();
     }
 }

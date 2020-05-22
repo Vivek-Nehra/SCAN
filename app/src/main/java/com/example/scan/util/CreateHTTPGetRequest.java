@@ -30,10 +30,10 @@ public class CreateHTTPGetRequest extends AsyncTask<String, Void, String>{
                 HttpURLConnection http = (HttpURLConnection) url.openConnection();
                 http.connect();
                 int statusCode = http.getResponseCode();
-                Log.d("StatusCode","Value: " + statusCode);
+//                Log.d("StatusCode","Value: " + statusCode);
 
                 if(statusCode == 500) {
-                    Log.d("500","Checking status again..");
+//                    Log.d("500","Checking status again..");
                     if (http != null) {
                         http.disconnect();
                     }
