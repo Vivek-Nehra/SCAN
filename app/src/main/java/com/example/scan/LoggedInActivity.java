@@ -1,51 +1,47 @@
 package com.example.scan;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.scan.util.CreateHTTPPostRequest;
-import com.example.scan.util.CreateHTTPGetRequest;
-import com.example.scan.util.HotspotManager;
+
+import com.example.scan.util.User;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoggedInActivity extends AppCompatActivity{
 
     private boolean doublePressToExit = false;
     private Toast toast = null;
-    private String bikeIP = null;       // todo : Take from FireStore
+    private String username = null;
+    private String bikeIP = null;
+    private int totalDistance = 0;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
+
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
+
 
         (findViewById(R.id.signOut)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,6 +91,7 @@ public class LoggedInActivity extends AppCompatActivity{
                 }
         }
     }
+
 
     @Override
     public void onBackPressed(){        // todo: Check working after adding multiple activites to the activity stack

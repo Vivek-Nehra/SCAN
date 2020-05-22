@@ -24,7 +24,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
@@ -47,10 +46,6 @@ public class ScannerActivity extends AppCompatActivity {
         Camera.Parameters params;
         Camera camera;
         processingScannedField = false;
-
-        // returns a reference to firebase Json tree.
-        final DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-        final DatabaseReference raspRef = rootRef.child("raspberries");
 
 
         // camera setup and qr code detection.
@@ -110,41 +105,38 @@ public class ScannerActivity extends AppCompatActivity {
                             assert vibrator != null;
                             vibrator.vibrate(100);
                             textScan.setText("Processing QR Code");
-
-                            Query ipquery = raspRef.child("configurations");
-
-                            ipquery.addListenerForSingleValueEvent(new ValueEventListener() {
-
+                            String qrCode = qrCodes.valueAt(0).displayValue;
+                            DatabaseReference piRef = FirebaseDatabase.getInstance().getReference().child("pi").child(qrCode);
+                            //piRef.child("status").setValue("Active");
+                            piRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    Iterable<DataSnapshot> dataSnapshotIterable = dataSnapshot.getChildren();
-                                    for (DataSnapshot p : dataSnapshotIterable) {
-                                        String piname = p.getKey();
-                                        String qrcode = qrCodes.valueAt(0).displayValue;
-                                        assert piname != null;
-                                        // Obtained IP address
-                                        if(piname.equals(qrcode)) {
-                                            String ipvalue = p.getValue(String.class);
-                                            processingScannedField = false;
-                                            cameraSource.stop();
-                                            textScan.setText("Bike Found");
+                                    String ip = dataSnapshot.child("ipaddress").getValue(String.class);
+                                    if(ip!=null) {
+                                        Log.d("Scan","IP: " + ip);
+                                        processingScannedField = false;
+                                        cameraSource.stop();
+                                        textScan.setText("Bike Found");
 
-                                            Intent scannedData = new Intent(getApplicationContext(), BikeControllerActivity.class);
-                                            scannedData.putExtra("IP", ipvalue);
-                                            startActivity(scannedData);
-                                            finish();
-                                            return;
-                                        }
+                                        Intent scannedData = new Intent(getApplicationContext(), BikeControllerActivity.class);
+                                        scannedData.putExtra("IP", ip);
+                                        startActivity(scannedData);
+                                        finish();
                                     }
                                     processingScannedField = false;
                                     textScan.setText("Focus on QR Code");
+
                                 }
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    Log.e("Error", "Unable to retrieve IP address.");
                                     processingScannedField = false;
                                 }
                             });
+
+
+
                         }
                     });
                 }

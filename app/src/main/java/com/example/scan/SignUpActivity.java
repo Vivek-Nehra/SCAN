@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.scan.util.Watcher;
+import com.example.scan.util.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
@@ -23,12 +24,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.regex.*;
 
 public class SignUpActivity extends AppCompatActivity implements View.OnClickListener {
     private FirebaseAuth mauth;
-    private EditText signUpEmail, signUpPassword;
+    private EditText signUpEmail, signUpPassword, username;
     private ProgressDialog pd;
+
+    private FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
+    private DatabaseReference userRef = scanDB.getReference();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +47,10 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         pd = new ProgressDialog(this);
         pd.setCanceledOnTouchOutside(false);
 
+        username = findViewById(R.id.username);
         signUpEmail = findViewById(R.id.signUpEmail);
         signUpPassword = findViewById(R.id.signUpPassword);
+        username.addTextChangedListener(new Watcher(username));
         signUpEmail.addTextChangedListener(new Watcher(signUpEmail));
         signUpPassword.addTextChangedListener(new Watcher(signUpPassword));
 
@@ -55,7 +65,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             startActivity(loginIntent);
         }
         if (v.getId() == R.id.signUpBtn) {
-            signUpUser(signUpEmail.getText().toString(), (signUpPassword.getText().toString()));
+            signUpUser(username.getText().toString(), (signUpEmail.getText().toString()), (signUpPassword.getText().toString()));
         }
         if (v.getId() == R.id.togglePassword2){
             if (signUpPassword.getTransformationMethod() instanceof PasswordTransformationMethod) {
@@ -77,6 +87,16 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
     private void showSnackbar(String message) {
         Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
+    }
+
+    private boolean checkValidName(String name) {
+        if (name.length() <= 0) {
+            Log.d("Log", "Invalid User Name");
+            username.requestFocus();
+            username.setError("Name field can't be empty.");
+            return false;
+        }
+        return true;
     }
 
     private boolean checkValidId(String email) {
@@ -105,8 +125,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         return true;
     }
 
-    public void signUpUser(String email, String password) {
-        if (!checkValidId(email) || !checkValidPassword(password)) {
+    public void signUpUser(final String name, final String email, String password) {
+        if (!checkValidName(name) || !checkValidId(email) || !checkValidPassword(password)) {
             return;
         }
 
@@ -132,6 +152,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                                                     Log.d("Log", "Email sent to: " + user.getEmail());
                                                     toastMessage("Verification mail sent to id. Please verify. ");
                                                     pd.dismiss();
+                                                    User tempUser = new User(name,email);
+                                                    userRef.child("Users").child(user.getUid()).setValue(tempUser);
                                                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
                                                 } else {
                                                     Exception e = task.getException();
@@ -157,4 +179,5 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                     }
                 });
     }
+
 }

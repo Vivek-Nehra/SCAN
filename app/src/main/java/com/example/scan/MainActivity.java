@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+
 import com.example.scan.util.Watcher;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -23,6 +24,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -95,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             } else {
                                 startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
-                                Toast.makeText(getApplicationContext(), "Welcome " + mauth.getCurrentUser().getDisplayName() + " !", Toast.LENGTH_SHORT).show();
+                                displayName();
                             }
                         } else {
                             Log.d("Log", "Login Error: ", task.getException());
@@ -165,5 +172,25 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy(){
         super.onDestroy();
         toast.cancel();
+    }
+
+    protected void displayName() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
+        DatabaseReference userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String username = dataSnapshot.child("username").getValue(String.class);
+                toast.setText("Welcome, " + username);
+                toast.show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("Error", "Unable to load User");
+            }
+        });
     }
 }
