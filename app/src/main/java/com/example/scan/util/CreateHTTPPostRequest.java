@@ -1,6 +1,7 @@
 package com.example.scan.util;
 
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -26,7 +27,6 @@ public class CreateHTTPPostRequest extends AsyncTask<String, Void, String> {
         String pass = params[1];
         String bikeIP = params[2];
         String androidIP = params[3];
-
 
         try {
             URL url = new URL("https://scan-app2020.herokuapp.com/scanapp/receive");
@@ -95,6 +95,6 @@ public class CreateHTTPPostRequest extends AsyncTask<String, Void, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "{\"message\": \"Error. Try Again.\"}";
+        return "{\"message\": \"Error. Check your Internet Connection\"}";
     }
 }

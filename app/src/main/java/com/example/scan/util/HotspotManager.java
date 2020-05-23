@@ -17,13 +17,12 @@ public class HotspotManager {
 
     private final WifiManager wifiManager;
     private final OnHotspotEnabledListener onHotspotEnabledListener;
-    private WifiManager.LocalOnlyHotspotReservation mReservation;
+    private static WifiManager.LocalOnlyHotspotReservation mReservation;    // todo : Consider making a singleton class
 
     public interface OnHotspotEnabledListener{
         void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration);
 
     }
-
 
     public HotspotManager(WifiManager wifiManager, OnHotspotEnabledListener onHotspotEnabledListener) {
         this.wifiManager = wifiManager;
@@ -32,7 +31,7 @@ public class HotspotManager {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void turnOnHotspot(final Context context) {
-        if (mReservation == null) {
+//        if (mReservation == null) {
             wifiManager.startLocalOnlyHotspot(new WifiManager.LocalOnlyHotspotCallback() {
 
                 @Override
@@ -40,7 +39,6 @@ public class HotspotManager {
                     super.onStarted(reservation);
                     mReservation = reservation;
                     onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
-
                 }
 
                 @Override
@@ -65,9 +63,9 @@ public class HotspotManager {
                     }
                 }
             }, new Handler());
-        } else{
-            onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
-        }
+//        } else{
+//            onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
+//        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
