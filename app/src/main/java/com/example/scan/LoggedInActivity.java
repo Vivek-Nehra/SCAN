@@ -1,5 +1,6 @@
 package com.example.scan;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -7,25 +8,38 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
 
-public class LoggedInActivity extends AppCompatActivity {
+import com.example.scan.util.User;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+public class LoggedInActivity extends AppCompatActivity{
 
     private boolean doublePressToExit = false;
     private Toast toast = null;
+    private String username = null;
+    private String bikeIP = null;
+    private int totalDistance = 0;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
-        Log.d("Log", " UserName : " + FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
 
 
@@ -36,33 +50,34 @@ public class LoggedInActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
             }
+
         });
+
 
         (findViewById(R.id.floatingActionButton)).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                ASyncT startHotspot = new ASyncT();
-                startHotspot.execute();
-//                startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
-                System.out.println("I am here yooo!");
-                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
-                        PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this,
-                            new String[]{Manifest.permission.CAMERA},
-                            50);
-                } else
-
-                    startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
+            public void onClick(View view) {        // todo : Add all permissions at app startup
+                if (bikeIP == null) {
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(com.example.scan.LoggedInActivity.this,
+                                new String[]{Manifest.permission.CAMERA},
+                                50);
+                    } else {
+                        startActivity(new Intent(getApplicationContext(), ScannerActivity.class));
+                    }
+                } else{
+                    Log.d("Bike", bikeIP);
+                    Snackbar.make(findViewById(R.id.constraintLayout), "You already have rented a bike.", Snackbar.LENGTH_LONG).show();
+                }
             }});
     }
-
 
     // Checking the result of Permission Request
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case 50: {
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if ( requestCode == 50) {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -72,13 +87,8 @@ public class LoggedInActivity extends AppCompatActivity {
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    System.out.println("Permission denied by the user!!");
+                    Log.d("Scanner","Permission denied by the user!!");
                 }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request.
         }
     }
 
@@ -108,13 +118,4 @@ public class LoggedInActivity extends AppCompatActivity {
         toast.cancel();
     }
 
-}
-
-
-class ASyncT extends AsyncTask<Void, Void, Void> {
-    @Override
-    protected Void doInBackground(Void ...params){
-        // todo : Add logic to start hotspot with random username and password
-        return null;
-    }
 }

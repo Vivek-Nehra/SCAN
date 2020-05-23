@@ -1,5 +1,8 @@
 package com.example.scan.util;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -9,42 +12,60 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 
+
 public class HotspotManager {
+
     private final WifiManager wifiManager;
     private final OnHotspotEnabledListener onHotspotEnabledListener;
-    private WifiManager.LocalOnlyHotspotReservation mReservation;
+    private static WifiManager.LocalOnlyHotspotReservation mReservation;    // todo : Consider making a singleton class
 
     public interface OnHotspotEnabledListener{
         void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration);
-    }8
 
-    //call with Hotspotmanager(getApplicationContext().getSystemService(Context.WIFI_SERVICE),this) in an activity that implements the Hotspotmanager.OnHotspotEnabledListener
+    }
+
     public HotspotManager(WifiManager wifiManager, OnHotspotEnabledListener onHotspotEnabledListener) {
         this.wifiManager = wifiManager;
         this.onHotspotEnabledListener = onHotspotEnabledListener;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void turnOnHotspot() {
-        wifiManager.startLocalOnlyHotspot(new WifiManager.LocalOnlyHotspotCallback() {
+    public void turnOnHotspot(final Context context) {
+//        if (mReservation == null) {
+            wifiManager.startLocalOnlyHotspot(new WifiManager.LocalOnlyHotspotCallback() {
 
-            @Override
-            public void onStarted(WifiManager.LocalOnlyHotspotReservation reservation) {
-                super.onStarted(reservation);
-                mReservation = reservation;
-                onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
-            }
+                @Override
+                public void onStarted(WifiManager.LocalOnlyHotspotReservation reservation) {
+                    super.onStarted(reservation);
+                    mReservation = reservation;
+                    onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
+                }
 
-            @Override
-            public void onStopped() {
-                super.onStopped();
-            }
+                @Override
+                public void onStopped() {
+                    super.onStopped();
+                }
 
-            @Override
-            public void onFailed(int reason) {
-                super.onFailed(reason);
-            }
-        }, new Handler());
+                @Override
+                public void onFailed(int reason) {
+                    super.onFailed(reason);
+                    if (reason == 3) {
+                        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                        alertDialog.setTitle("Alert");
+                        alertDialog.setMessage("Disable Hotspot and Try again");
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
+            }, new Handler());
+//        } else{
+//            onHotspotEnabledListener.OnHotspotEnabled(true, mReservation.getWifiConfiguration());
+//        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
