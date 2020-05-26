@@ -5,4 +5,5 @@
     <color name="colorAccent">#D81B60</color>
     <color name="aquaBlue">#1092F6</color>
     <color name="darkWhite">#EFEDED</color>
+    <color name="bgMain">#043D5C</color>
 </resources>
