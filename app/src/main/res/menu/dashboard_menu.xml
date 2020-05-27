@@ -4,7 +4,9 @@
 
     <item
         android:icon="@drawable/baseline_bookmark_border_24"
-        android:title="Home" />
+        android:title="Home"
+        android:id="@+id/home"
+        />
     <item
         android:icon="@drawable/ic_logout"
         android:title="Logout"
