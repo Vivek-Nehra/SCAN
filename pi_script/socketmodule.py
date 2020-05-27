@@ -35,10 +35,17 @@ def startServer(ip_address_pi):
 
 
 
+<<<<<<< HEAD
 def startClient(IP,msg_to_app):
 
     # Insert IP and Port No. of Android device here. 
     HOST = IP
+=======
+def startClient(msg_to_app):
+
+    # Insert IP and Port No. of Android device here. 
+    HOST = "10.27.145.226"
+>>>>>>> 5eacd1300a02be466b7bbb42fb99c39e20185020
     PORT = 9002
 
     # Creating socket connection. 
