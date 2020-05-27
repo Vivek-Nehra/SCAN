@@ -6,7 +6,8 @@
         android:icon="@drawable/baseline_bookmark_border_24"
         android:title="Home" />
     <item
-        android:icon="@drawable/baseline_drag_indicator_24"
-        android:title="More"
+        android:icon="@drawable/ic_logout"
+        android:title="Logout"
+        android:id="@+id/signOut"
         app:showAsAction="ifRoom" />
 </menu>

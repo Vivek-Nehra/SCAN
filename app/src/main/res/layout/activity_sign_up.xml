@@ -49,13 +49,9 @@
 
     <EditText
         android:id="@+id/signUpPassword"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:ems="10"
+        style="@style/authText"
         android:hint="Password"
         android:inputType="textPassword"
-        android:textColor="@color/darkWhite"
-        android:textColorHint="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,13 +61,9 @@
 
     <EditText
         android:id="@+id/username"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:ems="10"
+        style="@style/authText"
         android:hint="Your Full Name"
         android:inputType="textPersonName|textCapWords"
-        android:textColor="@color/darkWhite"
-        android:textColorHint="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,13 +72,9 @@
 
     <EditText
         android:id="@+id/signUpEmail"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:ems="10"
+        style="@style/authText"
         android:hint="E-mail"
         android:inputType="textEmailAddress"
-        android:textColor="@color/darkWhite"
-        android:textColorHint="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
