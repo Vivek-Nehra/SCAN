@@ -9,8 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 import com.example.scan.util.CreateHTTPGetRequest;
 import com.example.scan.util.CreateHTTPPostRequest;
 import com.example.scan.util.HotspotManager;
+import com.example.scan.util.Sockets;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,6 +51,8 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private Toast toast = null;
     private Handler updateUI;
     private Runnable runHandler;
+    private Sockets socketConnection = null;
+    private boolean doublePressToExit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +63,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         bikeDashboard = findViewById(R.id.bike_control_dashboard);
 
         hotspot = new HotspotManager((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE),this);
+        socketConnection = new Sockets();
 
         toast = Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT);
         pd = new ProgressDialog(this);
@@ -74,16 +80,41 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 overridePendingTransition(0, 0);
             }
         });
+
+        (findViewById(R.id.lock)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SocketResponse().execute(bikeIP,"Lock");
+            }
+        });
+        (findViewById(R.id.unlock)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SocketResponse().execute(bikeIP,"Unlock");
+            }
+        });
+        (findViewById(R.id.release)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SocketResponse().execute(bikeIP,"Release");
+            }
+        });
     }
 
     @Override
     public void onStart(){
         super.onStart();
-        bikeDashboard.setVisibility(View.GONE);
-        checkConnection.setVisibility(View.GONE);
-
         bikeIP = getIntent().getStringExtra("IP");
-        hotspot.turnOnHotspot(BikeControllerActivity.this);
+
+        if (connectionEstablished != CONNECTION_ESTABLISHED) {
+            bikeDashboard.setVisibility(View.GONE);
+            checkConnection.setVisibility(View.GONE);
+
+            hotspot.turnOnHotspot(BikeControllerActivity.this);
+        } else {
+            bikeDashboard.setVisibility(View.VISIBLE);
+            checkConnection.setVisibility(View.GONE);
+        }
     }
 
     public String getDeviceIP() {
@@ -133,6 +164,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         if (androidIP != null) {
             getRequest = new GetRequest();
             getRequest.execute(androidIP);
+            socketConnection.startServerSocket();
 
             checkConnection.setVisibility(View.VISIBLE);
             final ImageView retry = findViewById(R.id.retryButton);
@@ -156,6 +188,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                             connectingText.setText("Timeout occurred. Retry.");
                             Log.d("Bike", "Timeoout");
                             retry.setVisibility(View.VISIBLE);
+                            socketConnection.closeAllConnectionsAndThreads();
                         }
                         else {
                             updateUI.postDelayed(this,1000);
@@ -165,16 +198,36 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                         connectingText.setText("Connection Failed. Make Sure you are close to the bike.");
                         Log.d("Bike", "Not Connected.");
                         retry.setVisibility(View.VISIBLE);
+                        socketConnection.closeAllConnectionsAndThreads();
                     }
                     if (connectionEstablished == CONNECTION_ESTABLISHED) {
                         cancelAsyncTasks();
+                        socketConnection.closeAllConnectionsAndThreads();
                         connectingText.setText("Connected ... ");
                         Log.d("Bike", "Connected");
-                        retry.setVisibility(View.INVISIBLE);
+                        SystemClock.sleep(1000);
+                        checkConnection.setVisibility(View.GONE);
+                        bikeDashboard.setVisibility(View.VISIBLE);
                     }
                 }
             };
             updateUI.post(runHandler);
+        }
+    }
+
+    private class SocketResponse extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String ...params){
+            String ip = params[0];
+            String msg = params[1];
+            String response = socketConnection.sendClientMessage(ip,msg);
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            toast = Toast.makeText(getApplicationContext(),result,Toast.LENGTH_LONG);
+            toast.show();
         }
     }
 
@@ -247,19 +300,40 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     }
 
     @Override
+    public void onBackPressed(){
+        if (connectionEstablished != CONNECTION_ESTABLISHED) {
+            if (doublePressToExit) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+            doublePressToExit = true;
+            toast.setText("Press again to exit.");
+            toast.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (connectionEstablished != CONNECTION_ESTABLISHED) {
+                        doublePressToExit = false;
+                    }
+                }
+            }, 2000);
+        }
+    }
+
+    @Override
     public void onStop(){
         super.onStop();
-        cancelAsyncTasks();
-        if (updateUI != null && runHandler != null){
-            updateUI.removeCallbacks(runHandler);
-        }
-        toast.cancel();
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
         cancelAsyncTasks();
+        if (socketConnection != null){
+            socketConnection.closeAllConnectionsAndThreads();
+        }
         if (updateUI != null && runHandler != null){
             updateUI.removeCallbacks(runHandler);
         }

@@ -140,13 +140,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onStart(){      // todo: Add a splash screen on startup
+    public void onStart(){
         super.onStart();
-
-        if(mauth.getCurrentUser() != null && mauth.getCurrentUser().isEmailVerified()){
-            Log.d("Log", "Logging User in : " + mauth.getCurrentUser().getDisplayName() + " " + mauth.getCurrentUser().getEmail());
-            startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
-        }
     }
 
     @Override

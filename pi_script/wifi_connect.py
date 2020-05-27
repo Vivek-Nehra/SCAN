@@ -2,6 +2,8 @@ import re
 import subprocess
 import time
 
+def get_ip_address():
+	return(str(subprocess.check_output("hostname -I".split())).split()[0])
 
 def connect_to_wifi(name,pswd):
 	global log
@@ -10,8 +12,8 @@ def connect_to_wifi(name,pswd):
 		add_wifi(name,pswd)
 		subprocess.call("sudo wpa_cli -i wlan0 reconfigure".split())
 		start_time, wait_time = [time.time()]*2
-		log.write("Refreshed Wifi")
-		while(not subprocess.check_output("hostname -I".split()).strip()):
+		log.write("Refreshed Wifi\n Hostname : " + str(subprocess.check_output("hostname -I".split())) + "\n")
+		while(len(str(subprocess.check_output("sudo iwgetid wlan0 -r".split())).strip()) == 0):
 			wait_time = time.time()-start_time
 			if wait_time >= 20:
 				print("Connection taking too long. Try again later")
@@ -20,7 +22,7 @@ def connect_to_wifi(name,pswd):
 				return False
 			continue
 
-		connected_device = subprocess.check_output(['sudo','iwgetid'])
+		connected_device = subprocess.check_output("sudo iwgetid wlan0 -r".split())
 		print(connected_device)
 		log.write("Connected Device: " + str(connected_device))
 
@@ -53,7 +55,7 @@ def add_wifi(name,pswd):
 			text = "".join(fp.readlines())
 			if append_text not in text:
 				fp.write(append_text)
-			log.write("Wifi added successfully\n")	
+			log.write("Wifi added successfully\n")
 	except Exception as e:
 		raise e
 
@@ -67,7 +69,6 @@ def delete_wifi(name,pswd):
 
 	with open("/etc/wpa_supplicant/wpa_supplicant.conf","r+") as fp:
 		text = "".join(fp.readlines())
-		print(text)
 		if delete_text in text:
 			text = re.sub(delete_text, "", text)
 			fp.seek(0)
