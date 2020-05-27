@@ -1,18 +1,22 @@
 package com.example.scan;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -84,13 +88,13 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         (findViewById(R.id.lock)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SocketResponse().execute(bikeIP,"Lock");
+                new SocketResponse().execute("192.168.43.21","Lock");
             }
         });
         (findViewById(R.id.unlock)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SocketResponse().execute(bikeIP,"Unlock");
+                new SocketResponse().execute("192.168.43.21","Unlock");
             }
         });
         (findViewById(R.id.release)).setOnClickListener(new View.OnClickListener() {
@@ -110,10 +114,34 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             bikeDashboard.setVisibility(View.GONE);
             checkConnection.setVisibility(View.GONE);
 
-            hotspot.turnOnHotspot(BikeControllerActivity.this);
+            Log.d("Hotspot", "Starting Hotspot");
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(com.example.scan.BikeControllerActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        25);
+            } else {
+                hotspot.turnOnHotspot(BikeControllerActivity.this);
+            }
         } else {
             bikeDashboard.setVisibility(View.VISIBLE);
             checkConnection.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if ( requestCode == 25) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                hotspot.turnOnHotspot(BikeControllerActivity.this);
+            } else {
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+                Log.d("Hotspot","Permission denied by the user!!");
+            }
         }
     }
 
@@ -174,6 +202,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             updateUI= new Handler();
             runHandler = new Runnable() {
                 private int count = 0;
+                private boolean isConnected = false;
                 @Override
                 public void run() {
                     TextView connectingText = findViewById(R.id.connectionTextBox);
@@ -187,6 +216,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                             cancelAsyncTasks();
                             connectingText.setText("Timeout occurred. Retry.");
                             Log.d("Bike", "Timeoout");
+                            hotspot.turnOffHotspot();
                             retry.setVisibility(View.VISIBLE);
                             socketConnection.closeAllConnectionsAndThreads();
                         }
@@ -195,19 +225,24 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                         }
                     }
                     if (connectionEstablished == CONNECTION_FAILED) {
-                        connectingText.setText("Connection Failed. Make Sure you are close to the bike.");
+                        connectingText.setText("Connection Failed. Make Sure you are close to the bike or Try Again later.");
                         Log.d("Bike", "Not Connected.");
+                        hotspot.turnOffHotspot();
                         retry.setVisibility(View.VISIBLE);
                         socketConnection.closeAllConnectionsAndThreads();
                     }
                     if (connectionEstablished == CONNECTION_ESTABLISHED) {
                         cancelAsyncTasks();
                         socketConnection.closeAllConnectionsAndThreads();
-                        connectingText.setText("Connected ... ");
-                        Log.d("Bike", "Connected");
-                        SystemClock.sleep(1000);
-                        checkConnection.setVisibility(View.GONE);
-                        bikeDashboard.setVisibility(View.VISIBLE);
+                        if (!isConnected){
+                            connectingText.setText("Connected ^_^ ");
+                            Log.d("Bike", "Connected");
+                            updateUI.postDelayed(this,1000);
+                            isConnected = true;
+                        } else {
+                            checkConnection.setVisibility(View.GONE);
+                            bikeDashboard.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
             };
@@ -221,6 +256,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             String ip = params[0];
             String msg = params[1];
             String response = socketConnection.sendClientMessage(ip,msg);
+            Log.d("Socket Data Received", response);
             return response;
         }
 

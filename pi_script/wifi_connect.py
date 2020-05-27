@@ -5,12 +5,15 @@ import time
 def get_ip_address():
 	return(str(subprocess.check_output("hostname -I".split())).split()[0])
 
+def refresg_wifi():
+	subprocess.call("sudo wpa_cli -i wlan0 reconfigure".split())
+
 def connect_to_wifi(name,pswd):
 	global log
 	log = open("logger.txt", "w")
+	refresh_wifi()
 	try:
 		add_wifi(name,pswd)
-		subprocess.call("sudo wpa_cli -i wlan0 reconfigure".split())
 		start_time, wait_time = [time.time()]*2
 		log.write("Refreshed Wifi\n Hostname : " + str(subprocess.check_output("hostname -I".split())) + "\n")
 		while(len(str(subprocess.check_output("sudo iwgetid wlan0 -r".split())).strip()) == 0):
