@@ -56,6 +56,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
         findViewById(R.id.login).setOnClickListener(this);
         findViewById(R.id.signUpBtn).setOnClickListener(this);
+        findViewById(R.id.togglePassword2).setOnClickListener(this);
     }
 
     @Override
@@ -70,11 +71,11 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         if (v.getId() == R.id.togglePassword2){
             if (signUpPassword.getTransformationMethod() instanceof PasswordTransformationMethod) {
                 signUpPassword.setTransformationMethod(new SingleLineTransformationMethod());
-                ((ImageView)findViewById(R.id.togglePassword)).setImageResource(R.drawable.baseline_visibility_off_24);
+                ((ImageView)findViewById(R.id.togglePassword2)).setImageResource(R.drawable.baseline_visibility_off_24);
             }
             else {
                 signUpPassword.setTransformationMethod(new PasswordTransformationMethod());
-                ((ImageView)findViewById(R.id.togglePassword)).setImageResource(R.drawable.baseline_visibility_24);
+                ((ImageView)findViewById(R.id.togglePassword2)).setImageResource(R.drawable.baseline_visibility_24);
             }
             signUpPassword.setSelection(signUpPassword.getText().length());
         }
