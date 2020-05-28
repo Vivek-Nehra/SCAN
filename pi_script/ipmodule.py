@@ -2,6 +2,7 @@ import requests
 import time
 import wifi_connect
 import socketmodule
+import hardware_control
 
 
 def connect_to_server():
@@ -34,6 +35,7 @@ def connect_to_server():
         reply = socketmodule.send_message(android_ip,b"Connection Established \n")
 	print(reply)
 	if reply:
+		hardware_control.connected()
 		released = socketmodule.start_server_socket()
 		if released:
 			print("Restarting server again")
