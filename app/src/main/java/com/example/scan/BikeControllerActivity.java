@@ -88,7 +88,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 int hours = totalTime / 3600;
                 int minutes = (totalTime % 3600) / 60;
                 int seconds = totalTime % 60;
-                timer.setText(String.format("%0.02d:%0.02d:%0.02d", hours, minutes, seconds));
+                timer.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
             }
         };
 
@@ -296,7 +296,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                                         }
                                     }
                                 }
-                            });
+                            }).start();
                         }
                     }
                 }

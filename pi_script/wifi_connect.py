@@ -5,7 +5,7 @@ import time
 def get_ip_address():
 	return(str(subprocess.check_output("hostname -I".split())).split()[0])
 
-def refresg_wifi():
+def refresh_wifi():
 	subprocess.call("sudo wpa_cli -i wlan0 reconfigure".split())
 
 def connect_to_wifi(name,pswd):
@@ -15,7 +15,8 @@ def connect_to_wifi(name,pswd):
 	try:
 		add_wifi(name,pswd)
 		start_time, wait_time = [time.time()]*2
-		log.write("Refreshed Wifi\n Hostname : " + str(subprocess.check_output("hostname -I".split())) + "\n")
+		refresh_wifi()
+		log.write("Refreshed wifi \n")
 		while(len(str(subprocess.check_output("sudo iwgetid wlan0 -r".split())).strip()) == 0):
 			wait_time = time.time()-start_time
 			if wait_time >= 20:
