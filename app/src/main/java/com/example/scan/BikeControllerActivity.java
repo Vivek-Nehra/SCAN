@@ -61,6 +61,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private Sockets socketConnection = null;
     private boolean doublePressToExit = false;
     private TextView timer;
+    private static boolean isActivityRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
 
         checkConnection = findViewById(R.id.check_connection);
         bikeDashboard = findViewById(R.id.bike_control_dashboard);
+        isActivityRunning = true;
 
         hotspot = new HotspotManager((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE),this);
         socketConnection = new Sockets();
@@ -282,7 +284,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                                 public void run() {
                                     while (connectionEstablished == CONNECTION_ESTABLISHED)
                                     {
-                                        if (runTimer != null){
+                                        if (isActivityRunning){
                                             runOnUiThread(runTimer);
                                         }
                                         try {
@@ -436,6 +438,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             updateUI.removeCallbacks(runHandler);
         }
         runTimer = null;
+        isActivityRunning = false;
         toast.cancel();
     }
 }
