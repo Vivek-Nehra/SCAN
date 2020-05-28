@@ -1,11 +1,63 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:fontFamily">@font/fenix</item>
+<!--        <item name="android:background"> @color/bgMain</item>-->
+    </style>
+
+    <style name="authButton" parent="android:Widget.Material.Button">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/gradient</item>
+        <item name="android:layout_width">135dp</item>
+        <item name="android:layout_height">64dp</item>
+    </style>
+    <style name="authButton2" parent="android:Widget.Material.Button">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">#00000000</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="authText" parent="android:Widget.Material.TextView">
+        <item name="android:textColor">@color/darkWhite</item>
+        <item name="android:textColorHint">@color/darkWhite</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:layout_width">350dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:ems">10</item>
+    </style>
+
+    <style name="cardStyle" parent="CardView">
+        <item name="android:layout_width">140dp</item>
+        <item name="android:layout_height">160dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/transparent</item>
+    </style>
+
+    <style name="cardImage">
+        <item name="android:layout_height">100dp</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="cardText" parent="android:Widget.Material.TextView">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textColor">@color/darkWhite</item>
+        <item name="android:textSize">16sp</item>
+
+    </style>
+
+    <style name="SplashScreenTheme" parent="Theme.AppCompat.NoActionBar">
+    <item name="android:windowBackground">@drawable/splash_screen_background</item>
     </style>
 
 </resources>

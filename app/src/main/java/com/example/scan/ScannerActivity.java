@@ -134,9 +134,6 @@ public class ScannerActivity extends AppCompatActivity {
                                     processingScannedField = false;
                                 }
                             });
-
-
-
                         }
                     });
                 }

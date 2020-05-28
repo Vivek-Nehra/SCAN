@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#009688">
+    android:background="@color/bgMain">
 
 
     <SurfaceView
@@ -20,13 +20,15 @@
 
     <TextView
         android:id="@+id/textscan"
-        android:layout_width="308dp"
-        android:layout_height="87dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="78dp"
         android:layout_marginTop="486dp"
         android:layout_marginEnd="79dp"
         android:layout_marginBottom="232dp"
         android:text="Focus on QR code"
+        android:textSize="24sp"
+        android:textColor="@color/darkWhite"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

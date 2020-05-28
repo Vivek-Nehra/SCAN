@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             } else {
                                 startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
-                                displayName();
                             }
                         } else {
                             Log.d("Log", "Login Error: ", task.getException());
@@ -140,13 +139,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onStart(){      // todo: Add a splash screen on startup
+    public void onStart(){
         super.onStart();
-
-        if(mauth.getCurrentUser() != null && mauth.getCurrentUser().isEmailVerified()){
-            Log.d("Log", "Logging User in : " + mauth.getCurrentUser().getDisplayName() + " " + mauth.getCurrentUser().getEmail());
-            startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
-        }
     }
 
     @Override
@@ -174,23 +168,4 @@ public class MainActivity extends AppCompatActivity {
         toast.cancel();
     }
 
-    protected void displayName() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
-        DatabaseReference userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
-
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String username = dataSnapshot.child("username").getValue(String.class);
-                toast.setText("Welcome, " + username);
-                toast.show();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("Error", "Unable to load User");
-            }
-        });
-    }
 }
