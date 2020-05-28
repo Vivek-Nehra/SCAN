@@ -34,18 +34,40 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signUpPassword"
-        app:layout_constraintVertical_bias="0.095" />
+        app:layout_constraintVertical_bias="0.100000024" />
 
 
-    <Button
-        android:id="@+id/login"
-        style="@style/authButton2"
-        android:text="Existing User?\nLog In Here"
+<!--    <Button-->
+<!--        android:id="@+id/login"-->
+<!--        style="@style/authButton2"-->
+<!--        android:text="Log In Here"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/signUpBtn"-->
+<!--        app:layout_constraintVertical_bias="0.128" />-->
+
+    <TextView
+        android:id="@+id/olduser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Existing User?"
+        android:textColor="@color/darkWhite"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signUpBtn"
-        app:layout_constraintVertical_bias="0.128" />
+        app:layout_constraintVertical_bias="0.15" />
+
+    <Button
+        android:id="@+id/login"
+        style="@style/authButton2"
+        android:text="@string/login"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/olduser"
+        app:layout_constraintVertical_bias="0.0" />
 
     <EditText
         android:id="@+id/signUpPassword"
@@ -68,7 +90,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.243" />
+        app:layout_constraintVertical_bias="0.3" />
 
     <EditText
         android:id="@+id/signUpEmail"
@@ -92,5 +114,14 @@
         app:layout_constraintTop_toTopOf="@+id/signUpPassword"
         app:layout_constraintVertical_bias="0.423"
         app:srcCompat="@drawable/baseline_visibility_24" />
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/logo"
+        app:layout_constraintBottom_toTopOf="@+id/username"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
