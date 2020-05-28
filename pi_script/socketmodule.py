@@ -4,6 +4,7 @@ import socket
 from wifi_connect import get_ip_address
 import _thread
 import time
+import hardware_control
 
 
 def start_server_socket():
@@ -36,14 +37,17 @@ def start_server_socket():
 		if "Lock" in msg_from_app:
 			print("Locking")
 			conn.sendall(b"Locked \n")
+			hardware_control.lock()
 
 		elif "Unlock" in msg_from_app:
 			print("Unlocking")
 			conn.send(b"Unlocked \n")
+			hardware_control.unlock()
 
 		elif "Release" in msg_from_app:
 			print("Releasing")
 			conn.send(b"Released \n")
+			hardware_control.release()
 			return True
 		else:
 			print("Received data")

@@ -8,8 +8,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiConfiguration;
@@ -41,6 +43,7 @@ import static com.example.scan.util.Constants.CONNECTION_ESTABLISHED;
 import static com.example.scan.util.Constants.CONNECTION_FAILED;
 import static com.example.scan.util.Constants.CONNECTION_UNKNOWN;
 import static com.example.scan.util.Constants.connectionEstablished;
+import static com.example.scan.util.Constants.totalTime;
 
 public class BikeControllerActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener {
     private ConstraintLayout bikeDashboard, checkConnection;
@@ -54,9 +57,11 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private GetRequest getRequest;
     private Toast toast = null;
     private Handler updateUI;
-    private Runnable runHandler;
+    private Runnable runHandler, runTimer;
     private Sockets socketConnection = null;
     private boolean doublePressToExit = false;
+    private TextView timer;
+    private static boolean isActivityRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +70,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
 
         checkConnection = findViewById(R.id.check_connection);
         bikeDashboard = findViewById(R.id.bike_control_dashboard);
+        isActivityRunning = true;
 
         hotspot = new HotspotManager((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE),this);
         socketConnection = new Sockets();
@@ -73,6 +79,20 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         pd = new ProgressDialog(this);
         pd.setCanceledOnTouchOutside(false);
         pd.setMessage("Please Wait");
+
+        timer = findViewById(R.id.time);
+        updateUI= new Handler();
+        runTimer = new Runnable(){
+            @Override
+            public void run() {
+                int hours = totalTime / 3600;
+                int minutes = (totalTime % 3600) / 60;
+                int seconds = totalTime % 60;
+                timer.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+            }
+        };
+
+
 
         (findViewById(R.id.retryButton)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +120,25 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         (findViewById(R.id.release)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SocketResponse().execute(bikeIP,"Release");
+                new AlertDialog.Builder(BikeControllerActivity.this)
+                        .setMessage("This will end your ride. \n Are you sure?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                pd.setMessage("Ending Trip");
+                                pd.show();
+                                new SocketResponse().execute(bikeIP,"Release");
+                                dialog.cancel();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                // Perform Your Task Here--When No is pressed
+                                dialog.cancel();
+                            }
+                        }).show();
             }
         });
     }
@@ -199,7 +237,6 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             retry.setVisibility(View.INVISIBLE);
             bikeDashboard.setVisibility(View.INVISIBLE);
 
-            updateUI= new Handler();
             runHandler = new Runnable() {
                 private int count = 0;
                 private boolean isConnected = false;
@@ -242,6 +279,24 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                         } else {
                             checkConnection.setVisibility(View.GONE);
                             bikeDashboard.setVisibility(View.VISIBLE);
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    while (connectionEstablished == CONNECTION_ESTABLISHED)
+                                    {
+                                        if (isActivityRunning){
+                                            runOnUiThread(runTimer);
+                                        }
+                                        try {
+                                            Thread.sleep(1000);
+                                            totalTime++;
+                                        } catch (InterruptedException e) {
+                                            System.out.println("Timer thread exception");
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }).start();
                         }
                     }
                 }
@@ -263,6 +318,17 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         @Override
         protected void onPostExecute(String result){
             toast = Toast.makeText(getApplicationContext(),result,Toast.LENGTH_LONG);
+            if (pd.isShowing()){
+                pd.dismiss();
+            }
+            if (result.contains("Release")){
+                connectionEstablished = CONNECTION_UNKNOWN;
+                // Update time and other values to database
+
+                totalTime = 0;
+                startActivity(new Intent(getApplicationContext(),LoggedInActivity.class));
+                finish();
+            }
             toast.show();
         }
     }
@@ -356,11 +422,9 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 }
             }, 2000);
         }
-    }
-
-    @Override
-    public void onStop(){
-        super.onStop();
+        else{
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -373,6 +437,8 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         if (updateUI != null && runHandler != null){
             updateUI.removeCallbacks(runHandler);
         }
+        runTimer = null;
+        isActivityRunning = false;
         toast.cancel();
     }
 }
