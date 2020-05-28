@@ -376,3 +376,10 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         toast.cancel();
     }
 }
+
+
+//    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+//    FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
+//    DatabaseReference userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
+//    userRef.child("currentBike").setValue(bikeIP);
+//    userRef.child("currentBike").setValue(null);

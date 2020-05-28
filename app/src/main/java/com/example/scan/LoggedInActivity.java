@@ -6,23 +6,21 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.ProgressDialog;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-//import com.example.scan.util.GetUserData;
-import com.example.scan.util.GetUserData;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
@@ -35,13 +33,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 
 public class LoggedInActivity extends AppCompatActivity  {
@@ -52,12 +48,12 @@ public class LoggedInActivity extends AppCompatActivity  {
     private String bikeIP = null;
     private Uri filePath;
     private final int PICK_IMAGE_REQUEST = 71;
-//    private UserData userdata;
     private Bitmap user_image;
 
     private StorageReference storageReference;
     private FirebaseUser currentUser;
     private StorageReference ref;
+
     TextView profileName;
     de.hdodenhof.circleimageview.CircleImageView profileImage;
 
@@ -67,11 +63,8 @@ public class LoggedInActivity extends AppCompatActivity  {
     protected void onStart() {
 
         super.onStart();
-        //getUserData();
-//        userdata = new UserData();
-//        userdata.execute();
-
-
+        getUserData();
+        getUserImage();
     }
 
 
@@ -210,15 +203,11 @@ public class LoggedInActivity extends AppCompatActivity  {
 
         if(filePath != null)
         {
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();
 
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            progressDialog.dismiss();
                             Toast.makeText(LoggedInActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
 
                         }
@@ -226,108 +215,88 @@ public class LoggedInActivity extends AppCompatActivity  {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            progressDialog.dismiss();
                             Toast.makeText(LoggedInActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                                    .getTotalByteCount());
-                            progressDialog.setMessage("Uploaded "+(int)progress+"%");
                         }
                     });
         }
     }
 
-//    private class UserData extends GetUserData{
-//        @Override
-//        protected void onPostExecute(String result) {
-//            super.onPostExecute(result);
-//            if (isCancelled()) {
-//                return;
-//            }
-//            username = this.name;
-//            user_image = this.image;
-//            bikeIP = this.bikeName;
-//            Log.d("async", "in post execute " + username);
-//
-//            if(username!=null){
-//                profileName.setText(username);
-//            }
-//            if(user_image!=null){
-//                profileImage.setImageBitmap(user_image);
-//            }
-//        }
-//    }
-//    private class UserData extends AsyncTask<String, Void, String>{
-//
-//        @Override
-//        protected String doInBackground(String... strings) {
-//            getUserData();
-//            return "Success";
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String result) {
-//            if (isCancelled()){
-//                return;
-//            }
-//            Log.d("async", "in post execute " + username);
-//
-//            if(username!=null){
-//                profileName.setText(username);
-//            }
-//            if(user_image!=null){
-//                profileImage.setImageBitmap(user_image);
-//            }
-//        }
-//    }
+    @SuppressLint("HandlerLeak")
+    private Handler dataHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            profileName.setText(username);
+            toast.setText("Welcome, " + username);
+            toast.show();
+
+            //super.handleMessage(msg);
+        }
+    };
+
+    @SuppressLint("HandlerLeak")
+    private Handler imgHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            profileImage.setImageBitmap(user_image);
+        }
+    };
 
 
-//    protected void getUserData() {
-//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-//        FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
-//        DatabaseReference userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
-//
-//        userRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                username = dataSnapshot.child("username").getValue(String.class);
-////                toast.setText("Welcome, " + username);
-////                toast.show();
-//                bikeIP = dataSnapshot.child("currentBike").getValue(String.class);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//                Log.e("Error", "Unable to load User");
-//            }
-//        });
-//        try {
-//            final File localFile = File.createTempFile("Images", "bmp");
-//            ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener< FileDownloadTask.TaskSnapshot >() {
-//                @Override
-//                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-//                    try {
-//                        user_image = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }).addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception e) {
-//                    Log.e("UserData", "Unable to load image");
-//                }
-//            });
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//    }
+    protected void getUserData() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
+                DatabaseReference userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
+
+                userRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        username = dataSnapshot.child("username").getValue(String.class);
+                        bikeIP = dataSnapshot.child("currentBike").getValue(String.class);
+                        Log.d("handler", username);
+                        Message msg = dataHandler.obtainMessage();
+                        dataHandler.sendMessage(msg);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.e("Error", "Unable to load User");
+                    }
+
+                });
+
+            }
+        }).start();
+    }
+
+    protected void getUserImage() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final File localFile = File.createTempFile("Images", "bmp");
+                    ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener< FileDownloadTask.TaskSnapshot >() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                user_image = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                                Log.d("handler", "User_image Loaded");
+                                Message msg = dataHandler.obtainMessage();
+                                imgHandler.sendMessage(msg);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("UserData", "Unable to load image");
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
 }
 

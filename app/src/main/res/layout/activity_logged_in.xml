@@ -33,7 +33,7 @@
             android:id="@+id/profile_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Vivek Nehra"
+            android:text="User"
             android:textColor="@color/darkWhite"
             android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
