@@ -46,7 +46,7 @@ public class Sockets {
                     PrintWriter output = new PrintWriter(s.getOutputStream(), true);
 
                     // Reverse connection establishment.
-                    if (stringData.equals("Connection Established")) {
+                    if (stringData.contains("Connection Established")) {
                         output.println("FROM SERVER - OK");
                         Constants.connectionEstablished = CONNECTION_ESTABLISHED;
                     } else {

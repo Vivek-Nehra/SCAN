@@ -6,4 +6,6 @@
     <color name="aquaBlue">#1092F6</color>
     <color name="darkBlue">#043d5b</color>
     <color name="darkWhite">#EFEDED</color>
+    <color name="bgMain">#043D5C</color>
+    <color name="transparent">#00000000</color>
 </resources>
