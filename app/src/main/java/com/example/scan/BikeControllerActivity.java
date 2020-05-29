@@ -1,12 +1,5 @@
 package com.example.scan;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -14,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -22,26 +14,21 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.scan.util.CreateHTTPGetRequest;
 import com.example.scan.util.CreateHTTPPostRequest;
 import com.example.scan.util.HotspotManager;
 import com.example.scan.util.Sockets;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,8 +45,7 @@ import static com.example.scan.util.Constants.CONNECTION_UNKNOWN;
 import static com.example.scan.util.Constants.connectionEstablished;
 import static com.example.scan.util.Constants.totalTime;
 
-// TODO: BikeControllerActivity will implement "OnMapReadyCallback" interface as well (Done). @ Aditya
-public class BikeControllerActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener, OnMapReadyCallback {
+public class BikeControllerActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener{
     private ConstraintLayout bikeDashboard, checkConnection;
     private String bikeIP;
     private HotspotManager hotspot;
@@ -77,42 +63,10 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private TextView timer;
     private static boolean isActivityRunning;
 
-
-    // TODO: Variables defined as follows. @ Aditya
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    private static final String TAG = BikeControllerActivity.class.getSimpleName();
-    private GoogleMap map;
-    private CameraPosition cameraPosition;
-
-
-    private FusedLocationProviderClient fusedLocationProviderClient;
-
-    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 15;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean locationPermissionGranted;
-    private Location lastKnownLocation;
-    private static final String KEY_CAMERA_POSITION = "camera_position";
-    private static final String KEY_LOCATION = "location";
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_controller);
-
-        // TODO: Written within onCreate method. @Aditya
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (savedInstanceState != null) {
-            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
-        }
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map); // TODO: Fragment id is "map" (uncomment in bike_control_dashboard.xml file)!.
-        mapFragment.getMapAsync(this);
-        ////////////////////////////////////////////////////////////////////////////////////////
 
         checkConnection = findViewById(R.id.check_connection);
         bikeDashboard = findViewById(R.id.bike_control_dashboard);
@@ -187,127 +141,6 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     }
 
 
-    // TODO: Remaining methods @Aditya
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        if (map != null) {
-            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
-            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
-        }
-        super.onSaveInstanceState(outState);
-    }
-
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        this.map = map;
-        this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-
-            @Override
-            public View getInfoWindow(Marker arg0) {
-                return null;
-            }
-
-            @Override
-            public View getInfoContents(Marker marker) {
-                // Inflate the layouts for the info window, title and snippet.
-                View infoWindow = getLayoutInflater().inflate(R.layout.map_contents,
-                        (FrameLayout) findViewById(R.id.map), false); // TODO: uncomment fragment in bike_control_dashboard.xml
-
-                TextView title = infoWindow.findViewById(R.id.title);
-                title.setText(marker.getTitle());
-
-                TextView snippet = infoWindow.findViewById(R.id.snippet);
-                snippet.setText(marker.getSnippet());
-
-                return infoWindow;
-            }
-        });
-
-        // Prompt the user for permission.
-        getLocationPermission();
-
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
-    }
-
-    private void getDeviceLocation() {
-        try {
-            if (locationPermissionGranted) {
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
-                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(lastKnownLocation.getLatitude(),
-                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                            }
-                        } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            map.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                            map.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage(), e);
-        }
-    }
-
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
-
-
-    private void updateLocationUI() {
-        if (map == null) {
-            return;
-        }
-        try {
-            if (locationPermissionGranted) {
-                map.setMyLocationEnabled(true);
-                map.getUiSettings().setMyLocationButtonEnabled(true);
-            } else {
-                map.setMyLocationEnabled(false);
-                map.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownLocation = null;
-                getLocationPermission();
-            }
-        } catch (SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage());
-        }
-    }
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // LOOK AT onRequestPermissionMethod as well !! //////////////////////////////////////////////
-    // END/////////////////////////
-
-
-
-
-
-
-
-
-
     @Override
     public void onStart(){
         super.onStart();
@@ -345,15 +178,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 // functionality that depends on this permission.
                 Log.d("Hotspot","Permission denied by the user!!");
             }
-        }// TODO: This elseif statement and updateLocationUI() added !!
-        else if(requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationPermissionGranted = true;
-            }
         }
-        updateLocationUI();
     }
 
     public String getDeviceIP() {
