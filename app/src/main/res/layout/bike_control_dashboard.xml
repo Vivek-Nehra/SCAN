@@ -8,8 +8,6 @@
     android:backgroundTint="#FFFFFF">
 
 
-
-
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="fill_parent"
@@ -22,10 +20,11 @@
         app:layout_constraintTop_toBottomOf="@id/action"
         app:layout_constraintVertical_bias="0.0" />
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/action"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:background="@color/bgMain"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -38,29 +37,54 @@
             android:id="@+id/currentride"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Current Ride:"
+            android:text="Current Ride:  "
             android:textColor="@color/darkWhite"
-            android:textSize="24sp"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintEnd_toStartOf="@+id/currentbike"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.20" />
+            app:layout_constraintVertical_bias="0.050000012"
+            app:layout_constraintVertical_chainStyle="packed" />
 
         <TextView
             android:id="@+id/currentbike"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:text="Bike1097"
             android:textColor="@color/darkWhite"
             android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/currentride"
+            app:layout_constraintTop_toTopOf="@+id/currentride" />
+
+        <TextView
+            android:id="@+id/distanceText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance (km):"
+            android:textColor="@color/darkWhite"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/currentride"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/currentride"
-            app:layout_constraintVertical_bias="0.2" />
+            app:layout_constraintVertical_bias="0.15" />
+
+        <TextView
+            android:id="@+id/distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.0"
+            android:textColor="@color/darkWhite"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/distanceText"
+            app:layout_constraintTop_toBottomOf="@+id/distanceText" />
 
 
         <TextView
@@ -69,9 +93,11 @@
             android:layout_height="wrap_content"
             android:text="Time:"
             android:textColor="@color/darkWhite"
-            android:textSize="24sp"
-            app:layout_constraintStart_toStartOf="@+id/time"
-            app:layout_constraintTop_toTopOf="@+id/currentride" />
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@id/time"
+            app:layout_constraintTop_toTopOf="@+id/distanceText" />
 
         <TextView
             android:id="@+id/time"
@@ -84,8 +110,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.9"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/timetext"
-            app:layout_constraintVertical_bias="0.19999999" />
+            app:layout_constraintTop_toBottomOf="@+id/timetext" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -141,6 +166,7 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
 
