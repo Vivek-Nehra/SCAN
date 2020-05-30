@@ -53,6 +53,7 @@ public class LoggedInActivity extends AppCompatActivity  {
     private StorageReference storageReference;
     private FirebaseUser currentUser;
     private StorageReference ref;
+    private DatabaseReference userRef;
 
     TextView profileName;
     de.hdodenhof.circleimageview.CircleImageView profileImage;
@@ -82,6 +83,11 @@ public class LoggedInActivity extends AppCompatActivity  {
         profileImage = findViewById(R.id.profile_image);
 
         //getUserData();
+        System.out.println("Logged In started again");
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
+        userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
 
         (findViewById(R.id.profile_image)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,14 +97,34 @@ public class LoggedInActivity extends AppCompatActivity  {
 
         });
 
-
-
         (findViewById(R.id.signOut)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
+            }
+
+        });
+
+        (findViewById(R.id.cardView1)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (bikeIP == null){
+                    Snackbar.make(findViewById(R.id.constraintLayout), "Please rent a bike first", Snackbar.LENGTH_LONG).show();
+                } else{
+                    Intent intent = new Intent(getApplicationContext(),BikeControllerActivity.class);
+                    intent.putExtra("IP", bikeIP);
+                    startActivity(intent);
+                }
+            }
+        });
+
+
+        (findViewById(R.id.cardView2)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), PreviousHistoryActivity.class));
             }
 
         });
@@ -186,7 +212,6 @@ public class LoggedInActivity extends AppCompatActivity  {
         {
             filePath = data.getData();
             uploadImage();
-
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 profileImage.setImageBitmap(bitmap);
@@ -199,17 +224,13 @@ public class LoggedInActivity extends AppCompatActivity  {
     }
 
     private void uploadImage() {
-
-
         if(filePath != null)
         {
-
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             Toast.makeText(LoggedInActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
-
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -226,8 +247,6 @@ public class LoggedInActivity extends AppCompatActivity  {
         @Override
         public void handleMessage(Message msg){
             profileName.setText(username);
-            toast.setText("Welcome, " + username);
-            toast.show();
 
             //super.handleMessage(msg);
         }
@@ -243,12 +262,9 @@ public class LoggedInActivity extends AppCompatActivity  {
 
 
     protected void getUserData() {
-        new Thread(new Runnable() {
+        new Thread(new Runnable() { // todo: Use handler only
             @Override
             public void run() {
-                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
-                DatabaseReference userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
 
                 userRef.addValueEventListener(new ValueEventListener() {
                     @Override
@@ -264,9 +280,7 @@ public class LoggedInActivity extends AppCompatActivity  {
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         Log.e("Error", "Unable to load User");
                     }
-
                 });
-
             }
         }).start();
     }
@@ -297,6 +311,4 @@ public class LoggedInActivity extends AppCompatActivity  {
             }
         }).start();
     }
-
 }
-

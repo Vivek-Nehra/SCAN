@@ -30,7 +30,7 @@ public class CreateHTTPGetRequest extends AsyncTask<String, Void, String>{
                 HttpURLConnection http = (HttpURLConnection) url.openConnection();
                 http.connect();
                 int statusCode = http.getResponseCode();
-//                Log.d("StatusCode","Value: " + statusCode);
+                Log.d("StatusCode","Value: " + statusCode);
 
                 if(statusCode == 500) {
 //                    Log.d("500","Checking status again..");
@@ -49,7 +49,7 @@ public class CreateHTTPGetRequest extends AsyncTask<String, Void, String>{
                         while ((line = reader.readLine()) != null) {
                             result.append(line);
                         }
-                        Log.d("GET","Result from server" + result);
+//                        Log.d("GET","Result from server" + result);
 
                         return result.toString();
 
