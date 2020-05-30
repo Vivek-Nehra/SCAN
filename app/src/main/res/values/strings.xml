@@ -2,4 +2,5 @@
     <string name="app_name">SCAN</string>
     <string name="register"><u>Register Here</u></string>
     <string name="login"><u>Login Here</u></string>
+    <string name="summary"><u>Trip Summary</u></string>
 </resources>
