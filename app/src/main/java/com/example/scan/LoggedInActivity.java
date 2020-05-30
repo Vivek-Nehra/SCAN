@@ -104,6 +104,15 @@ public class LoggedInActivity extends AppCompatActivity  {
         });
 
 
+        (findViewById(R.id.cardView2)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), PreviousHistoryActivity.class));
+            }
+
+        });
+
+
         (findViewById(R.id.scanButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {        // todo : Add all permissions at app startup

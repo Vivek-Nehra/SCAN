@@ -8,7 +8,6 @@
     android:background="@drawable/gradient2"
     tools:context=".LoggedInActivity">
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -130,8 +129,6 @@
             <TextView
                 android:id="@+id/card2text"
                 style="@style/cardText"
-
-
                 android:gravity="center_horizontal"
                 android:text="Previous Rides\n"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -175,6 +172,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.75" />
 
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+
