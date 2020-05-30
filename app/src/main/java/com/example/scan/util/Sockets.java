@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +14,7 @@ import java.net.SocketTimeoutException;
 
 import static com.example.scan.util.Constants.CONNECTION_ESTABLISHED;
 import static com.example.scan.util.Constants.CONNECTION_UNKNOWN;
+import static com.example.scan.util.Constants.serverUnreachable;
 
 public class Sockets {
     private Thread serverThread = null , clientThread = null;
@@ -48,7 +50,7 @@ public class Sockets {
                     // Reverse connection establishment.
                     if (stringData.contains("Connection Established")) {
                         output.println("FROM SERVER - OK");
-                        Constants.connectionEstablished = CONNECTION_ESTABLISHED;
+                        Constants.connectionStatus = CONNECTION_ESTABLISHED;
                     }else {
                         output.println("FROM SERVER - Acknowledgement ");
                     }
@@ -68,9 +70,9 @@ public class Sockets {
     public String sendClientMessage(String ip, String msg){
         clientSocket = new Socket();
         try {
-            System.out.println("Received IP is : " + ip);
+            System.out.println("Received data is : " + msg);
             clientSocket.connect(new InetSocketAddress(ip, 9008),3000);
-            clientSocket.setSoTimeout(5000);
+            clientSocket.setSoTimeout(10000);
 
             OutputStream out = clientSocket.getOutputStream();
 
@@ -82,15 +84,22 @@ public class Sockets {
             final String st = input.readLine();
 
             System.out.println(st + "Message received from Server");
+            serverUnreachable = 0;
 
             output.close();
             out.close();
             clientSocket.close();
             return st;
         } catch (IOException e) {
-            System.out.println("Cannot connect to Server");
+            System.out.println("Cannot connect to Server: " + serverUnreachable);
+
+            if (e instanceof ConnectException){
+                serverUnreachable++;
+            }
             if (e instanceof SocketTimeoutException){
-                Constants.connectionEstablished = CONNECTION_UNKNOWN;
+                if (e.getMessage().contains("connect")){
+                    serverUnreachable++;
+                }
             }
             if (clientSocket != null)  {
                 try {

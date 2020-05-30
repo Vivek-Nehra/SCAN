@@ -8,4 +8,5 @@
 
     <include layout="@layout/check_connection"/>
     <include layout="@layout/bike_control_dashboard"/>
+    <include layout="@layout/sync_connection" />
 </androidx.constraintlayout.widget.ConstraintLayout>

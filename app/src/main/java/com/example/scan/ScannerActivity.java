@@ -115,12 +115,15 @@ public class ScannerActivity extends AppCompatActivity {
                                     if(ip!=null) {
                                         Log.d("Scan","IP: " + ip);
                                         processingScannedField = false;
-                                        cameraSource.stop();
+                                        if (cameraSource != null) {
+                                            cameraSource.stop();
+                                            cameraSource.release();
+                                        }
                                         textScan.setText("Bike Found");
 
-                                        Intent scannedData = new Intent(getApplicationContext(), BikeControllerActivity.class);
-                                        scannedData.putExtra("IP", ip);
-                                        startActivity(scannedData);
+                                        Intent intent = new Intent(getApplicationContext(), BikeControllerActivity.class);
+                                        intent.putExtra("IP", ip);
+                                        startActivity(intent);
                                         finish();
                                     }
                                     processingScannedField = false;
