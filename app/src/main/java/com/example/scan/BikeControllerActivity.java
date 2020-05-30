@@ -1,12 +1,5 @@
 package com.example.scan;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -26,10 +19,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.example.scan.util.CreateHTTPGetRequest;
 import com.example.scan.util.CreateHTTPPostRequest;
 import com.example.scan.util.HotspotManager;
 import com.example.scan.util.Sockets;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -51,6 +52,7 @@ import static com.example.scan.util.Constants.connectionStatus;
 import static com.example.scan.util.Constants.serverUnreachable;
 import static com.example.scan.util.Constants.totalTime;
 
+
 public class BikeControllerActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener {
     private ConstraintLayout bikeDashboard, checkConnection, syncConnection;
     private String bikeIP;
@@ -67,8 +69,10 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private Sockets socketConnection = null;
     private boolean doublePressToExit = false;
     private static boolean isActivityRunning;
+
     private DatabaseReference userRef;
     private Thread timerThread;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,7 +246,9 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             } else {
                 // permission denied, boo! Disable the
                 // functionality that depends on this permission.
+
                 Log.d("Hotspot", "Permission denied by the user!!");
+
             }
         }
     }

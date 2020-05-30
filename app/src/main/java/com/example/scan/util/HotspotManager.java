@@ -21,7 +21,6 @@ public class HotspotManager {
 
     public interface OnHotspotEnabledListener{
         void OnHotspotEnabled(boolean enabled, @Nullable WifiConfiguration wifiConfiguration);
-
     }
 
     public HotspotManager(WifiManager wifiManager, OnHotspotEnabledListener onHotspotEnabledListener) {

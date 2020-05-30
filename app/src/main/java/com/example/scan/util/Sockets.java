@@ -17,9 +17,9 @@ import static com.example.scan.util.Constants.CONNECTION_UNKNOWN;
 import static com.example.scan.util.Constants.serverUnreachable;
 
 public class Sockets {
-    private Thread serverThread = null , clientThread = null;
+    private Thread serverThread = null, clientThread = null;
     private ServerSocket serverSocket = null;
-    private Socket clientSocket = null ;
+    private Socket clientSocket = null;
 
     public void startServerSocket() {
 
@@ -50,13 +50,15 @@ public class Sockets {
                     // Reverse connection establishment.
                     if (stringData.contains("Connection Established")) {
                         output.println("FROM SERVER - OK");
+
                         Constants.connectionStatus = CONNECTION_ESTABLISHED;
                     }else {
+
                         output.println("FROM SERVER - Acknowledgement ");
                     }
                     output.close();
                     s.close();
-//                    }
+                  }
                     serverSocket.close();
                 } catch (IOException e) {
                     System.out.println("Server already running");
@@ -67,9 +69,10 @@ public class Sockets {
         serverThread.start();
     }
 
-    public String sendClientMessage(String ip, String msg){
+    public String sendClientMessage(String ip, String msg) {
         clientSocket = new Socket();
         try {
+
             System.out.println("Received data is : " + msg);
             clientSocket.connect(new InetSocketAddress(ip, 9008),3000);
             clientSocket.setSoTimeout(10000);
@@ -100,8 +103,9 @@ public class Sockets {
                 if (e.getMessage().contains("connect")){
                     serverUnreachable++;
                 }
+
             }
-            if (clientSocket != null)  {
+            if (clientSocket != null) {
                 try {
                     clientSocket.close();
                 } catch (IOException ex) {
@@ -119,7 +123,7 @@ public class Sockets {
         clientThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                sendClientMessage(ip,msg);
+                sendClientMessage(ip, msg);
             }
         });
         clientThread.start();
@@ -134,13 +138,13 @@ public class Sockets {
             if (clientSocket != null) {
                 clientSocket.close();
             }
-            if (serverThread != null && serverThread.isAlive()){
+            if (serverThread != null && serverThread.isAlive()) {
                 serverThread.interrupt();
             }
-            if (clientThread != null && clientThread.isAlive()){
+            if (clientThread != null && clientThread.isAlive()) {
                 clientThread.interrupt();
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalThreadStateException e) {
             e.printStackTrace();

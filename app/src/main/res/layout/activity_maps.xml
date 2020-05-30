@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="495dp"
+        tools:context="com.example.currentplacedetailsonmap.MapsActivityCurrentPlace" />
+
+    <TextView
+        android:id="@+id/cord"
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/distanceView"
+        android:layout_width="match_parent"
+        android:layout_height="78dp"
+        android:text="0" />
+
+
+</LinearLayout>
