@@ -40,6 +40,7 @@
         </activity>
         <activity android:name=".MainActivity" android:theme="@style/AppTheme"/>
         <activity android:name=".ScannerActivity" />
+        <activity android:name=".PreviousHistoryActivity" />
 
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
