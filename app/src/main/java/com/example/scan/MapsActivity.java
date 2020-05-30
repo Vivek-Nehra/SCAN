@@ -38,7 +38,7 @@ public class MapsActivity extends AppCompatActivity
 
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private final LatLng defaultLocation = new LatLng(28.644800, 77.216721); // Delhi
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
@@ -129,7 +129,7 @@ public class MapsActivity extends AppCompatActivity
                             // Set the map's camera position to the current location of the device.
                             currentLocation = task.getResult();
 
-                            if (currentLocation != null) {
+                            if (currentLocation != null && lastKnownLocation!=null) {
                                 TextView cords = findViewById(R.id.cord);
                                 String rst = ""+currentLocation.getLatitude() + "\n"+ currentLocation.getLongitude();
                                 Double lat1 = lastKnownLocation.getLatitude();
@@ -137,12 +137,21 @@ public class MapsActivity extends AppCompatActivity
                                 Double lat2 = currentLocation.getLatitude();
                                 Double lon2 = currentLocation.getLongitude();
 
-                                distance +=calculate_distance(lat1,lat2,lon1,lon2);
-
                                 cords.setText(rst);
+                                Double moved = calculate_distance(lat1,lat2,lon1,lon2);
+                                distance+=moved;
+                                if(distance<=1000.0){
+                                    TextView distanceView = findViewById(R.id.distanceView);
+                                    distanceView.setText(Double.toString(distance)+"m");
+                                }
+                                else {
+                                    TextView distanceView = findViewById(R.id.distanceView);
+                                    distanceView.setText(Double.toString(distance/1000.0)+"Km");
+                                }
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(lastKnownLocation.getLatitude(),
-                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                        new LatLng(currentLocation.getLatitude(),
+                                                currentLocation.getLongitude()), DEFAULT_ZOOM));
+                                lastKnownLocation = currentLocation;
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -167,12 +176,11 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
+                            // Set the map's camera position to the origin location of the device.
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
                                 TextView cords = findViewById(R.id.cord);
                                 String rst = Double.toString(lastKnownLocation.getLatitude()) + "\n"+ Double.toString(lastKnownLocation.getLongitude());
-                                rst = rst + "is Origin";
                                 cords.setText(rst);
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
@@ -261,6 +269,7 @@ public class MapsActivity extends AppCompatActivity
 
         // Radius of earth in kilometers.
         double r = 6371;
-        return(c * r);
+        // Return value in Metres.
+        return(c * r * 1000);
     }
 }
