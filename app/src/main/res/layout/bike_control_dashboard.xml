@@ -135,7 +135,7 @@
         android:layout_height="wrap_content"
         android:background="@color/darkWhite"
         android:gravity="center_horizontal"
-        android:text="0.000"
+        android:text="0.000 m/s"
         android:textColor="#000000"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
