@@ -3,15 +3,17 @@
     android:id="@+id/trip_details"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:visibility="invisible"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:background="@color/transparent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/summary"
-        android:layout_width="200dp"
-        android:layout_height="300dp"
-        android:background="@drawable/bg_wb"
+        android:layout_width="300dp"
+        android:layout_height="240dp"
+        android:background="@drawable/gradient_wb"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,7 +57,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/bikeName"
-            app:layout_constraintVertical_bias="0.25" />
+            app:layout_constraintVertical_bias="0.15" />
 
         <TextView
             android:id="@+id/dist1"
@@ -102,8 +104,8 @@
 
         <ImageView
             android:id="@+id/closeBtn"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:src="@drawable/close"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
