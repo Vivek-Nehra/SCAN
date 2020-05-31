@@ -54,6 +54,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -447,7 +448,10 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                                 TextView distanceView = findViewById(R.id.distance);
                                 int km = (int)distance/1000;
                                 int m = (int)distance % 1000;
-                                distanceView.setText(String.format("%02d:%03d km", km, m));
+                                distanceView.setText(String.format("%02d.%03d km", km, m));
+
+                                TextView speedView = findViewById(R.id.speed);
+                                speedView.setText((totalTime == 0 ? "0" : String.format("%.2f", distance/totalTime)) + "m/s");
 //                                if(distance<=1000.0){
 //                                    TextView distanceView = findViewById(R.id.distance);
 //                                    distanceView.setText(Double.toString(distance)+"m");
@@ -654,14 +658,22 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
 
         @Override
         protected void onPostExecute(String result) {
-            toast = Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG);
             if (pd.isShowing()) {
                 pd.dismiss();
             }
-            if (result.contains("Release")) {
+            TextView status = findViewById(R.id.status);
+
+            if (result.contains("Lock")){
+                status.setText("Locked");
+            }
+            else if (result.contains("Unlock")){
+                status.setText("Unlocked");
+            }
+            else if (result.contains("Release")) {
                 if (result.contains("Error")){
                     Toast.makeText(getApplicationContext(), "Please get close to a Dock Point and Retry", Toast.LENGTH_LONG).show();
                 } else {
+
                     TextView distanceSummary = findViewById(R.id.dist1);
                     TextView timeSummary = findViewById(R.id.time2);
                     int km = (int)distance/1000;
@@ -681,7 +693,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                     userRef.child("currentBike").setValue(null);
                     rideRef.setValue(ride);
 
-
+                    status.setText("Released");
                     tripDetails.setVisibility(View.VISIBLE);
                     bikeDashboard.setVisibility(View.VISIBLE);
                     bikeDashboard.setAlpha(0.5f);
@@ -689,7 +701,9 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                     syncConnection.setVisibility(View.INVISIBLE);
                 }
             }
-            toast.show();
+            else {
+                Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
