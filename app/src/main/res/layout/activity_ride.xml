@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout3"
+    android:layout_width="match_parent"
+    android:layout_height="100dp">
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bottom_border"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+
+        <TextView
+            android:id="@+id/textView5"
+            style="@style/rideData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance: "
+            app:layout_constraintTop_toTopOf="@id/date"
+            app:layout_constraintStart_toEndOf="@id/date"
+            app:layout_constraintEnd_toStartOf="@id/textView6" />
+
+        <TextView
+            android:id="@+id/distance"
+            style="@style/rideData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 km"
+            app:layout_constraintBottom_toTopOf="@+id/textView8"
+            app:layout_constraintTop_toBottomOf="@+id/textView5"
+            app:layout_constraintStart_toStartOf="@id/textView5"/>
+
+
+        <TextView
+            android:id="@+id/textView6"
+            style="@style/rideData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duration: "
+            app:layout_constraintTop_toTopOf="@id/date"
+            app:layout_constraintStart_toEndOf="@id/textView5"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <TextView
+            android:id="@+id/duration"
+            style="@style/rideData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00:00"
+            app:layout_constraintBottom_toTopOf="@id/textView8"
+            app:layout_constraintStart_toStartOf="@id/textView6"
+            app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+
+
+
+    <TextView
+        android:id="@+id/startTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Time"
+        style="@style/rideData"
+        app:layout_constraintBottom_toTopOf="@+id/textView8"
+        app:layout_constraintStart_toStartOf="@+id/bikeName"
+        app:layout_constraintTop_toBottomOf="@id/date" />
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date"
+        style="@style/rideData"
+        app:layout_constraintBottom_toTopOf="@+id/startTime"
+        app:layout_constraintStart_toStartOf="@+id/bikeName"
+        app:layout_constraintTop_toBottomOf="@+id/bikeName" />
+
+    <TextView
+        android:id="@+id/bikeName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name"
+        android:textColor="@color/bgMain"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/date"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

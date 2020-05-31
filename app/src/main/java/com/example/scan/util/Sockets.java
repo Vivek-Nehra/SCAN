@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,11 +14,12 @@ import java.net.SocketTimeoutException;
 
 import static com.example.scan.util.Constants.CONNECTION_ESTABLISHED;
 import static com.example.scan.util.Constants.CONNECTION_UNKNOWN;
+import static com.example.scan.util.Constants.serverUnreachable;
 
 public class Sockets {
-    private Thread serverThread = null , clientThread = null;
+    private Thread serverThread = null, clientThread = null;
     private ServerSocket serverSocket = null;
-    private Socket clientSocket = null ;
+    private Socket clientSocket = null;
 
     public void startServerSocket() {
 
@@ -48,15 +50,16 @@ public class Sockets {
                     // Reverse connection establishment.
                     if (stringData.contains("Connection Established")) {
                         output.println("FROM SERVER - OK");
-                        Constants.connectionEstablished = CONNECTION_ESTABLISHED;
+
+                        Constants.connectionStatus = CONNECTION_ESTABLISHED;
                     }else {
+
                         output.println("FROM SERVER - Acknowledgement ");
                     }
                     output.close();
                     s.close();
-//                    }
                     serverSocket.close();
-                } catch (IOException e) {
+                }catch (IOException e) {
                     System.out.println("Server already running");
                     e.printStackTrace();
                 }
@@ -65,12 +68,15 @@ public class Sockets {
         serverThread.start();
     }
 
-    public String sendClientMessage(String ip, String msg){
+    public String sendClientMessage(String ip, String msg) {
         clientSocket = new Socket();
         try {
-            System.out.println("Received IP is : " + ip);
+            if (ip == null){
+                ip = "192.168.43.21";
+            }
+            System.out.println("Received data is : " + msg);
             clientSocket.connect(new InetSocketAddress(ip, 9008),3000);
-            clientSocket.setSoTimeout(5000);
+            clientSocket.setSoTimeout(10000);
 
             OutputStream out = clientSocket.getOutputStream();
 
@@ -82,17 +88,25 @@ public class Sockets {
             final String st = input.readLine();
 
             System.out.println(st + "Message received from Server");
+            serverUnreachable = 0;
 
             output.close();
             out.close();
             clientSocket.close();
             return st;
         } catch (IOException e) {
-            System.out.println("Cannot connect to Server");
-            if (e instanceof SocketTimeoutException){
-                Constants.connectionEstablished = CONNECTION_UNKNOWN;
+            System.out.println("Cannot connect to Server: " + serverUnreachable);
+
+            if (e instanceof ConnectException){
+                serverUnreachable++;
             }
-            if (clientSocket != null)  {
+            if (e instanceof SocketTimeoutException){
+                if (e.getMessage().contains("connect")){
+                    serverUnreachable++;
+                }
+
+            }
+            if (clientSocket != null) {
                 try {
                     clientSocket.close();
                 } catch (IOException ex) {
@@ -110,7 +124,7 @@ public class Sockets {
         clientThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                sendClientMessage(ip,msg);
+                sendClientMessage(ip, msg);
             }
         });
         clientThread.start();
@@ -125,13 +139,13 @@ public class Sockets {
             if (clientSocket != null) {
                 clientSocket.close();
             }
-            if (serverThread != null && serverThread.isAlive()){
+            if (serverThread != null && serverThread.isAlive()) {
                 serverThread.interrupt();
             }
-            if (clientThread != null && clientThread.isAlive()){
+            if (clientThread != null && clientThread.isAlive()) {
                 clientThread.interrupt();
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalThreadStateException e) {
             e.printStackTrace();

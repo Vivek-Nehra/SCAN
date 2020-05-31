@@ -4,31 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient2"
-    android:id = "@+id/check_connection">
+    android:id = "@+id/sync_connection"
+    android:visibility="invisible">
 
     <ImageView
-        android:id="@+id/retryButton"
+        android:id="@+id/alertButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.518"
-        app:srcCompat="@drawable/round_refresh_24" />
+        app:srcCompat="?android:attr/alertDialogIcon" />
 
     <TextView
-        android:id="@+id/connectionTextBox"
+        android:id="@+id/syncConnectionTextBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="Connecting ."
+        android:text="Disconnected. Please get in Range of the Bike."
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/retryButton"
-        app:layout_constraintVertical_bias="0.298" />
+        app:layout_constraintTop_toBottomOf="@+id/alertButton"
+        app:layout_constraintVertical_bias="0.100000024" />
 </androidx.constraintlayout.widget.ConstraintLayout>
