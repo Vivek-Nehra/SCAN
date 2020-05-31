@@ -110,13 +110,13 @@ public class LoggedInActivity extends AppCompatActivity  {
         (findViewById(R.id.cardView1)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (bikeIP == null){
-                    Snackbar.make(findViewById(R.id.constraintLayout), "Please rent a bike first", Snackbar.LENGTH_LONG).show();
-                } else{
+//                if (bikeIP == null){
+//                    Snackbar.make(findViewById(R.id.constraintLayout), "Please rent a bike first", Snackbar.LENGTH_LONG).show();
+//                } else{
                     Intent intent = new Intent(getApplicationContext(),BikeControllerActivity.class);
                     intent.putExtra("IP", bikeIP);
                     startActivity(intent);
-                }
+//                }
             }
         });
 

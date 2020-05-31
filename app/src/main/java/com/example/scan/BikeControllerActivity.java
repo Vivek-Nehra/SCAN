@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -15,6 +16,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +33,19 @@ import com.example.scan.util.CreateHTTPPostRequest;
 import com.example.scan.util.HotspotManager;
 import com.example.scan.util.Sockets;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -44,6 +59,8 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.scan.util.Constants.CONNECTION_ESTABLISHED;
 import static com.example.scan.util.Constants.CONNECTION_FAILED;
@@ -53,8 +70,8 @@ import static com.example.scan.util.Constants.serverUnreachable;
 import static com.example.scan.util.Constants.totalTime;
 
 
-public class BikeControllerActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener {
-    private ConstraintLayout bikeDashboard, checkConnection, syncConnection;
+public class BikeControllerActivity extends AppCompatActivity implements HotspotManager.OnHotspotEnabledListener, OnMapReadyCallback {
+    private ConstraintLayout bikeDashboard, checkConnection, syncConnection, tripDetails;
     private String bikeIP;
     private HotspotManager hotspot;
     private String hotspotName = null;
@@ -73,6 +90,27 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private DatabaseReference userRef;
     private Thread timerThread;
 
+    private static final String TAG = BikeControllerActivity.class.getSimpleName();
+    private GoogleMap map;
+    private CameraPosition cameraPosition;
+
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
+    private final LatLng defaultLocation = new LatLng(28.644800, 77.216721); // Delhi
+    private static final int DEFAULT_ZOOM = 15;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean locationPermissionGranted;
+
+
+    private Location lastKnownLocation;
+    private Location currentLocation;
+    private double distance = 0.0d;
+
+    private static final String KEY_CAMERA_POSITION = "camera_position";
+    private static final String KEY_LOCATION = "location";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +120,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         checkConnection = findViewById(R.id.check_connection);
         bikeDashboard = findViewById(R.id.bike_control_dashboard);
         syncConnection = findViewById(R.id.sync_connection);
+        tripDetails = findViewById(R.id.trip_details);
 
         hotspot = new HotspotManager((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE), this);
         socketConnection = new Sockets();
@@ -146,14 +185,16 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                     checkConnection.setVisibility(View.INVISIBLE);
                     bikeDashboard.setVisibility(View.INVISIBLE);
                     syncConnection.setVisibility(View.VISIBLE);
+                    tripDetails.setVisibility(View.INVISIBLE);
                     Log.d("Connection", "Disconnected");
                 }
                 else{
                     checkConnection.setVisibility(View.INVISIBLE);
                     bikeDashboard.setVisibility(View.VISIBLE);
                     syncConnection.setVisibility(View.INVISIBLE);
+                    tripDetails.setVisibility(View.INVISIBLE);
                 }
-                syncConnectionStatus.postDelayed(this, 3000);
+//                syncConnectionStatus.postDelayed(this, 3000);
             }
         };
 
@@ -203,9 +244,41 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             }
         });
 
+        (findViewById(R.id.closeBtn)).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                connectionStatus = CONNECTION_UNKNOWN;
+                // Update time and other values to database
+                userRef.child("currentBike").setValue(null);
+
+                totalTime = 0;
+                hotspot.turnOffHotspot();
+                startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
+                finish();
+            }
+        });
+
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseDatabase scanDB = FirebaseDatabase.getInstance();
         userRef = scanDB.getReference().child("Users").child(currentUser.getUid());
+
+        if (savedInstanceState != null) {
+            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+        }
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (map != null) {
+            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
+            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -217,6 +290,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             bikeDashboard.setVisibility(View.GONE);
             checkConnection.setVisibility(View.GONE);
             syncConnection.setVisibility(View.GONE);
+            tripDetails.setVisibility(View.GONE);
 
             Log.d("Hotspot", "Starting Hotspot");
             if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
@@ -231,7 +305,8 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             bikeDashboard.setVisibility(View.VISIBLE);
             checkConnection.setVisibility(View.GONE);
             syncConnection.setVisibility(View.GONE);
-            syncConnectionStatus.postDelayed(syncStatus,3000);
+            tripDetails.setVisibility(View.GONE);
+//            syncConnectionStatus.postDelayed(syncStatus,3000);
         }
     }
 
@@ -248,10 +323,200 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 // functionality that depends on this permission.
 
                 Log.d("Hotspot", "Permission denied by the user!!");
-
             }
         }
+        locationPermissionGranted = false;
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationPermissionGranted = true;
+            }
+        }
+
     }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        this.map = map;
+
+//        this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+//
+//            @Override
+//            public View getInfoWindow(Marker arg0) {
+//                return null;
+//            }
+//
+//            @Override
+//            public View getInfoContents(Marker marker) {
+//                View infoWindow = getLayoutInflater().inflate(R.layout.activity_maps,
+//                        (FrameLayout) findViewById(R.id.map), false);
+//
+//                return infoWindow;
+//            }
+//        });
+
+        getLocationPermission();
+
+        updateLocationUI();
+
+        getOriginLocation();
+
+        // Tracking the device.
+        Timer t = new Timer();
+        t.scheduleAtFixedRate(new TimerTask() {
+
+            @Override
+            public void run() {
+                getDeviceLocation();
+            }}, 0, 10000);
+    }
+
+    private void updateLocationUI() {
+        if (map == null) {
+            return;
+        }
+        try {
+            if (locationPermissionGranted) {
+                map.setMyLocationEnabled(true);
+                map.getUiSettings().setMyLocationButtonEnabled(true);
+            } else {
+                map.setMyLocationEnabled(false);
+                map.getUiSettings().setMyLocationButtonEnabled(false);
+                lastKnownLocation = null;
+                getLocationPermission();
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    public static double calculate_distance(double lat1, double lat2, double lon1, double lon2) {
+
+        lon1 = Math.toRadians(lon1);
+        lon2 = Math.toRadians(lon2);
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+
+        // Haversine formula for distance calculation.
+        double dlon = lon2 - lon1;
+        double dlat = lat2 - lat1;
+        double a = Math.pow(Math.sin(dlat / 2), 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.pow(Math.sin(dlon / 2),2);
+
+        double c = 2 * Math.asin(Math.sqrt(a));
+
+        // Radius of earth in kilometers.
+        double r = 6371;
+        // Return value in Metres.
+        return(c * r * 1000);
+    }
+
+    private void getDeviceLocation() {
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            currentLocation = task.getResult();
+
+                            if (currentLocation != null && lastKnownLocation!=null) {
+//                                TextView cords = findViewById(R.id.cord);
+//                                String rst = ""+currentLocation.getLatitude() + "\n"+ currentLocation.getLongitude();
+                                Double lat1 = lastKnownLocation.getLatitude();
+                                Double lon1 = lastKnownLocation.getLongitude();
+                                Double lat2 = currentLocation.getLatitude();
+                                Double lon2 = currentLocation.getLongitude();
+
+//                                cords.setText(rst);
+                                Double moved = calculate_distance(lat1,lat2,lon1,lon2);
+                                distance+=moved;
+                                TextView distanceView = findViewById(R.id.distance);
+                                int km = (int)distance/1000;
+                                int m = (int)distance % 1000;
+                                distanceView.setText(String.format("%02d:%03d km", km, m));
+//                                if(distance<=1000.0){
+//                                    TextView distanceView = findViewById(R.id.distance);
+//                                    distanceView.setText(Double.toString(distance)+"m");
+//                                }
+//                                else {
+//                                    TextView distanceView = findViewById(R.id.distanceView);
+//                                    distanceView.setText(Double.toString(distance/1000.0)+"Km");
+//                                }
+                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(currentLocation.getLatitude(),
+                                                currentLocation.getLongitude()), DEFAULT_ZOOM));
+                                lastKnownLocation = currentLocation;
+                            }
+                        } else {
+                            Log.d(TAG, "Current location is null. Using defaults.");
+                            Log.e(TAG, "Exception: %s", task.getException());
+                            map.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                            map.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage(), e);
+        }
+    }
+
+    private void getOriginLocation() {
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the origin location of the device.
+                            lastKnownLocation = task.getResult();
+                            if (lastKnownLocation != null) {
+//                                TextView cords = findViewById(R.id.cord);
+//                                String rst = Double.toString(lastKnownLocation.getLatitude()) + "\n"+ Double.toString(lastKnownLocation.getLongitude());
+//                                cords.setText(rst);
+                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(lastKnownLocation.getLatitude(),
+                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                // Adding marker at starting location.
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude()))
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                            }
+                        } else {
+                            Log.d(TAG, "Current location is null. Using defaults.");
+                            Log.e(TAG, "Exception: %s", task.getException());
+                            map.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                            map.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage(), e);
+        }
+    }
+
+    private void getLocationPermission() {
+
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
 
     public String getDeviceIP() {
         try {
@@ -306,6 +571,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             retry.setVisibility(View.INVISIBLE);
             bikeDashboard.setVisibility(View.INVISIBLE);
             syncConnection.setVisibility(View.INVISIBLE);
+            tripDetails.setVisibility(View.INVISIBLE);
 
             runHandler = new Runnable() {
                 private int count = 0;
@@ -380,14 +646,11 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 if (result.contains("Error")){
                     Toast.makeText(getApplicationContext(), "Please get close to a Dock Point and Retry", Toast.LENGTH_LONG).show();
                 } else {
-                    connectionStatus = CONNECTION_UNKNOWN;
-                    // Update time and other values to database
-                    userRef.child("currentBike").setValue(null);
-
-                    totalTime = 0;
-                    hotspot.turnOffHotspot();
-                    startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
-                    finish();
+                    tripDetails.setVisibility(View.VISIBLE);
+                    bikeDashboard.setVisibility(View.VISIBLE);
+                    bikeDashboard.setAlpha(0.5f);
+                    checkConnection.setVisibility(View.INVISIBLE);
+                    syncConnection.setVisibility(View.INVISIBLE);
                 }
             }
             toast.show();

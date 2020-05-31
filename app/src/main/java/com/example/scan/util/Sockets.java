@@ -72,7 +72,9 @@ public class Sockets {
     public String sendClientMessage(String ip, String msg) {
         clientSocket = new Socket();
         try {
-
+            if (ip == null){
+                ip = "192.168.43.21";
+            }
             System.out.println("Received data is : " + msg);
             clientSocket.connect(new InetSocketAddress(ip, 9008),3000);
             clientSocket.setSoTimeout(10000);
