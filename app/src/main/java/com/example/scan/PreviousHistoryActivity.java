@@ -1,5 +1,6 @@
 package com.example.scan;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
@@ -69,5 +70,12 @@ public class PreviousHistoryActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed(){
+        super.onBackPressed();
+        startActivity(new Intent(getApplicationContext(),LoggedInActivity.class));
+        finish();
     }
 }

@@ -203,7 +203,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                     syncConnection.setVisibility(View.INVISIBLE);
                     tripDetails.setVisibility(View.INVISIBLE);
                 }
-//                syncConnectionStatus.postDelayed(this, 3000);
+                syncConnectionStatus.postDelayed(this, 3000);
             }
         };
 
@@ -256,7 +256,6 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
         (findViewById(R.id.closeBtn)).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                connectionStatus = CONNECTION_UNKNOWN;
                 // Update time and other values to database
                 userRef.child("currentBike").setValue(null);
 
@@ -311,12 +310,11 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 hotspot.turnOnHotspot(BikeControllerActivity.this);
             }
         } else {
-
             bikeDashboard.setVisibility(View.VISIBLE);
             checkConnection.setVisibility(View.GONE);
             syncConnection.setVisibility(View.GONE);
             tripDetails.setVisibility(View.GONE);
-//            syncConnectionStatus.postDelayed(syncStatus,3000);
+            syncConnectionStatus.postDelayed(syncStatus,3000);
         }
     }
 
@@ -349,23 +347,6 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     @Override
     public void onMapReady(GoogleMap map) {
         this.map = map;
-
-//        this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-//
-//            @Override
-//            public View getInfoWindow(Marker arg0) {
-//                return null;
-//            }
-//
-//            @Override
-//            public View getInfoContents(Marker marker) {
-//                View infoWindow = getLayoutInflater().inflate(R.layout.activity_maps,
-//                        (FrameLayout) findViewById(R.id.map), false);
-//
-//                return infoWindow;
-//            }
-//        });
-
         getLocationPermission();
 
         updateLocationUI();
@@ -435,14 +416,11 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                             currentLocation = task.getResult();
 
                             if (currentLocation != null && lastKnownLocation!=null) {
-//                                TextView cords = findViewById(R.id.cord);
-//                                String rst = ""+currentLocation.getLatitude() + "\n"+ currentLocation.getLongitude();
                                 Double lat1 = lastKnownLocation.getLatitude();
                                 Double lon1 = lastKnownLocation.getLongitude();
                                 Double lat2 = currentLocation.getLatitude();
                                 Double lon2 = currentLocation.getLongitude();
 
-//                                cords.setText(rst);
                                 Double moved = calculate_distance(lat1,lat2,lon1,lon2);
                                 distance+=moved;
                                 TextView distanceView = findViewById(R.id.distance);
@@ -452,14 +430,6 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
 
                                 TextView speedView = findViewById(R.id.speed);
                                 speedView.setText((totalTime == 0 ? "0" : String.format("%.2f", distance/totalTime)) + "m/s");
-//                                if(distance<=1000.0){
-//                                    TextView distanceView = findViewById(R.id.distance);
-//                                    distanceView.setText(Double.toString(distance)+"m");
-//                                }
-//                                else {
-//                                    TextView distanceView = findViewById(R.id.distanceView);
-//                                    distanceView.setText(Double.toString(distance/1000.0)+"Km");
-//                                }
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(currentLocation.getLatitude(),
                                                 currentLocation.getLongitude()), DEFAULT_ZOOM));
@@ -491,9 +461,6 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                             // Set the map's camera position to the origin location of the device.
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
-//                                TextView cords = findViewById(R.id.cord);
-//                                String rst = Double.toString(lastKnownLocation.getLatitude()) + "\n"+ Double.toString(lastKnownLocation.getLongitude());
-//                                cords.setText(rst);
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
@@ -673,7 +640,6 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 if (result.contains("Error")){
                     Toast.makeText(getApplicationContext(), "Please get close to a Dock Point and Retry", Toast.LENGTH_LONG).show();
                 } else {
-
                     TextView distanceSummary = findViewById(R.id.dist1);
                     TextView timeSummary = findViewById(R.id.time2);
                     int km = (int)distance/1000;
@@ -691,6 +657,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                     PreviousRides ride = new PreviousRides(bikeName, rideDate, rideTime, rideDistance, rideTotalTime );
                     DatabaseReference rideRef = userRef.child("rides").push();
                     userRef.child("currentBike").setValue(null);
+                    connectionStatus = CONNECTION_UNKNOWN;
                     rideRef.setValue(ride);
 
                     status.setText("Released");
@@ -699,6 +666,17 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                     bikeDashboard.setAlpha(0.5f);
                     checkConnection.setVisibility(View.INVISIBLE);
                     syncConnection.setVisibility(View.INVISIBLE);
+                    cancelAsyncTasks();
+                    if (socketConnection != null) {
+                        socketConnection.closeAllConnectionsAndThreads();
+                    }
+                    if (updateUI != null && runHandler != null) {
+                        updateUI.removeCallbacks(runHandler);
+                    }
+                    if (syncConnectionStatus != null && syncStatus != null){
+                        syncConnectionStatus.removeCallbacks(syncStatus);
+                    }
+
                 }
             }
             else {
@@ -819,8 +797,8 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             }, 2000);
         } else {
 //            super.onBackPressed();
-            moveTaskToBack(true);
-//            startActivity(new Intent(getApplicationContext(),LoggedInActivity.class));
+//            moveTaskToBack(true);
+            startActivity(new Intent(getApplicationContext(),LoggedInActivity.class));
         }
     }
 

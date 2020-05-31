@@ -110,13 +110,13 @@ public class LoggedInActivity extends AppCompatActivity  {
         (findViewById(R.id.cardView1)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                if (bikeIP == null){
-//                    Snackbar.make(findViewById(R.id.constraintLayout), "Please rent a bike first", Snackbar.LENGTH_LONG).show();
-//                } else{
+                if (bikeIP == null){
+                    Snackbar.make(findViewById(R.id.constraintLayout), "Please rent a bike first", Snackbar.LENGTH_LONG).show();
+                } else{
                     Intent intent = new Intent(getApplicationContext(),BikeControllerActivity.class);
                     intent.putExtra("IP", bikeIP);
                     startActivity(intent);
-//                }
+                }
             }
         });
 
@@ -231,6 +231,13 @@ public class LoggedInActivity extends AppCompatActivity  {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             Toast.makeText(LoggedInActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+                            Bitmap bitmap = null;
+                            try {
+                                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            profileImage.setImageBitmap(bitmap);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

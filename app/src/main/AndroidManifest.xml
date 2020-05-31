@@ -29,7 +29,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDy8RDppRKafWj8WjOjUcB6NPCdYt9aXa0" />
-        <activity android:name=".BikeControllerActivity" />
+        <activity android:name=".BikeControllerActivity" android:launchMode="singleInstance" />
         <activity android:name=".LoggedInActivity" android:launchMode="singleInstance" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".MapsActivity"/>
