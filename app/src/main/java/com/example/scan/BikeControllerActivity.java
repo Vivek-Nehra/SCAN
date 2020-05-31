@@ -302,6 +302,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 hotspot.turnOnHotspot(BikeControllerActivity.this);
             }
         } else {
+            timerThread.start();
             bikeDashboard.setVisibility(View.VISIBLE);
             checkConnection.setVisibility(View.GONE);
             syncConnection.setVisibility(View.GONE);
