@@ -64,7 +64,7 @@
             android:id="@+id/distanceText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Distance (km):"
+            android:text="Distance:"
             android:textColor="@color/darkWhite"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"

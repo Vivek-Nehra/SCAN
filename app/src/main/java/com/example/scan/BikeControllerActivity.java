@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat;
 import com.example.scan.util.CreateHTTPGetRequest;
 import com.example.scan.util.CreateHTTPPostRequest;
 import com.example.scan.util.HotspotManager;
+import com.example.scan.util.PreviousRides;
 import com.example.scan.util.Sockets;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -58,6 +59,9 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -106,6 +110,10 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
     private Location lastKnownLocation;
     private Location currentLocation;
     private double distance = 0.0d;
+
+    private String rideDate = null;
+    private String rideTime = null;
+    private String bikeName = "Bike1097";
 
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
@@ -302,7 +310,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 hotspot.turnOnHotspot(BikeControllerActivity.this);
             }
         } else {
-            timerThread.start();
+
             bikeDashboard.setVisibility(View.VISIBLE);
             checkConnection.setVisibility(View.GONE);
             syncConnection.setVisibility(View.GONE);
@@ -617,7 +625,14 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                             checkConnection.setVisibility(View.GONE);
                             bikeDashboard.setVisibility(View.VISIBLE);
                             userRef.child("currentBike").setValue(bikeIP);
+                            Date c = Calendar.getInstance().getTime();
+                            SimpleDateFormat df1 = new SimpleDateFormat("dd-MMM-yyyy");
+                            SimpleDateFormat df2 = new SimpleDateFormat("hh:mm a");
+                            rideDate = df1.format(c);
+                            rideTime = df2.format(c);
+                            Log.d("ride", rideDate + " " + rideTime);
                             timerThread.start();
+
                             syncConnectionStatus.postDelayed(syncStatus,3000);
                         }
                     }
@@ -647,6 +662,26 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
                 if (result.contains("Error")){
                     Toast.makeText(getApplicationContext(), "Please get close to a Dock Point and Retry", Toast.LENGTH_LONG).show();
                 } else {
+                    TextView distanceSummary = findViewById(R.id.dist1);
+                    TextView timeSummary = findViewById(R.id.time2);
+                    int km = (int)distance/1000;
+                    int m = (int)distance % 1000;
+                    String rideDistance = String.format("%02d.%03d km", km, m);
+                    distanceSummary.setText(rideDistance);
+
+                    int hours = totalTime / 3600;
+                    int minutes = (totalTime % 3600) / 60;
+                    int seconds = totalTime % 60;
+
+                    String rideTotalTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                    timeSummary.setText(rideTotalTime);
+
+                    PreviousRides ride = new PreviousRides(bikeName, rideDate, rideTime, rideDistance, rideTotalTime );
+                    DatabaseReference rideRef = userRef.child("rides").push();
+                    userRef.child("currentBike").setValue(null);
+                    rideRef.setValue(ride);
+
+
                     tripDetails.setVisibility(View.VISIBLE);
                     bikeDashboard.setVisibility(View.VISIBLE);
                     bikeDashboard.setAlpha(0.5f);

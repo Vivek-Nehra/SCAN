@@ -51,7 +51,7 @@ public class RideAdapter extends ArrayAdapter<PreviousRides> {
         viewHolder.bikeName.setText(ride.bikeName);
         viewHolder.date.setText(ride.date);
         viewHolder.startTime.setText(ride.startTime);
-        viewHolder.distance.setText(ride.distance + " km");
+        viewHolder.distance.setText(ride.distance);
         viewHolder.duration.setText(ride.duration);
         return convertView;
     }
