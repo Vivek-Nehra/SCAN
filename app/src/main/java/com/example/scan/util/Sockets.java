@@ -58,9 +58,8 @@ public class Sockets {
                     }
                     output.close();
                     s.close();
-                  }
                     serverSocket.close();
-                } catch (IOException e) {
+                }catch (IOException e) {
                     System.out.println("Server already running");
                     e.printStackTrace();
                 }

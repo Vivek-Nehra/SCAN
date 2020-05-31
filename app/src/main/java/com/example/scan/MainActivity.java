@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             } else {
                                 startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
+                                finish();
                             }
                         } else {
                             Log.d("Log", "Login Error: ", task.getException());
