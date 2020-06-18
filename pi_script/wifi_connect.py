@@ -8,6 +8,41 @@ def get_ip_address():
 def refresh_wifi():
 	subprocess.call("sudo wpa_cli -i wlan0 reconfigure".split())
 
+def flush_wifi():
+	subprocess.call("sudo cp /etc/wpa_supplicant/temp_wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf".split())
+
+def check_available_wifi():
+	devices = subprocess.check_output("sudo iwlist wlan0 scan".split())
+	subs = ""
+	for line in devices.splitlines():
+		if "ESSID" in line:
+			subs += line.split('"')[1] + '\n'
+	return subs
+
+def check_routers():
+	try:
+		with open("/etc/wpa_supplicant/temp_wpa_supplicant.conf","r+") as fp:
+			text = "".join(fp.readlines())
+			routers = ""
+			for line in text.splitlines():
+				if "ssid" in line:
+					routers += line.split('"')[1] + '\n'
+			return routers
+
+	except Exception as e:
+		print(str(e))
+
+def find_available_routers():
+	log = open("logger.txt", "w")
+	log.write("Opening Log")
+	devices = check_available_wifi()
+	log.write("Devices: " + devices + "\n")
+	routers = check_routers()
+	log.write("Routers : " + routers + "\n")
+	match = "".join([x for x in routers.splitlines() if x in devices.splitlines()])
+	log.write("Match : " + match + "\n")
+	return (match)
+
 def connect_to_wifi(name,pswd):
 	global log
 	log = open("logger.txt", "w")

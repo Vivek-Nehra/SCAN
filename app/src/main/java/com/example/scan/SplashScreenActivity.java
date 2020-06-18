@@ -24,7 +24,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable(){
             public void run(){
                 if(mauth.getCurrentUser() != null && mauth.getCurrentUser().isEmailVerified()){
-                    Log.d("Log", "Logging User in : " + mauth.getCurrentUser().getDisplayName() + " " + mauth.getCurrentUser().getEmail());
+                    Log.d("Log", "Logging User in : " + mauth.getCurrentUser().getUid() + " " + mauth.getCurrentUser().getEmail());
                     startActivity(new Intent(getApplicationContext(), LoggedInActivity.class));
                 }
                 else {

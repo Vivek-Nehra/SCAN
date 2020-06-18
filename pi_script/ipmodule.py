@@ -40,6 +40,7 @@ def connect_to_server():
 		if released:
 			print("Restarting server again")
 			wifi_connect.delete_wifi(ssid,psk)
+			wifi_connect.flush_wifi()
 			wifi_connect.refresh_wifi()
 			connect_to_server()
 	else:
