@@ -1,63 +1,73 @@
 #!/usr/bin/env python3
  
 import socket
-from wifi_connect import get_ip_address
-import _thread
+from wifi_connect import get_ip_address, find_available_routers
 import time
 import hardware_control
+
+
 
 
 def start_server_socket():
 
     HOST = str(get_ip_address())
     PORT = 9008
-
-
+    
+    
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((HOST, PORT))
-    server.listen(5)
-    print("Starting Server to receive commands")
-    while True:
-	try:
-		global conn
-	    	conn, addr = server.accept()
+    try:
+	server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    	server.bind((HOST, PORT))
+    	server.listen(5)
+    except Exception as e:
+	print(str(e))
+    finally:
+	    print("Starting Server to receive commands")
+	    while True:
+		try:
+			global conn
+	    		conn, addr = server.accept()
 
-    		msg_from_app = ''
-    		#while True:
-	        # Receiving data in form of chunks of size 4096 (can be changed as per usage).
-	        msg_chunk = conn.recv(4096)
-	        # Data is receieved in the form of bytes decode it into String type.
-	        msg_chunk = msg_chunk.decode()
+	    		msg_from_app = ''
+    			#while True:
+	        	# Receiving data in form of chunks of size 4096 (can be changed as per usage).
+	        	msg_chunk = conn.recv(4096)
+	        	# Data is receieved in the form of bytes decode it into String type.
+	        	msg_chunk = msg_chunk.decode()
 
-	        #if not msg_chunk: 
-	        	#break
-	        msg_from_app += msg_chunk
-	        print ("Data : " + msg_from_app)
+	        	#if not msg_chunk: 
+	        		#break
+	        	msg_from_app += msg_chunk
+	        	print ("Data : " + msg_from_app)
 
-		if "Lock" in msg_from_app:
-			print("Locking")
-			conn.sendall(b"Locked \n")
-			hardware_control.lock()
+			if "Lock" in msg_from_app:
+				print("Locking")
+				conn.sendall(b"Locked \n")
+				hardware_control.lock()
 
-		elif "Unlock" in msg_from_app:
-			print("Unlocking")
-			conn.send(b"Unlocked \n")
-			hardware_control.unlock()
+			elif "Unlock" in msg_from_app:
+				print("Unlocking")
+				conn.send(b"Unlocked \n")
+				hardware_control.unlock()
 
-		elif "Release" in msg_from_app:
-			print("Releasing")
-			conn.send(b"Released \n")
-			hardware_control.release()
-			return True
-		else:
-			print("Received data")
-			conn.send(b"Recevied \n")
+			elif "Release" in msg_from_app:
+				print("Releasing")
+				router = find_available_routers()
+				if router:
+					conn.send(b"Released:" + router[0] + " \n")
+					hardware_control.release()
+					conn.close()
+					return True
+				else:
+					conn.send(b"Release Error \n")
+			else:
+				print("Received data")
+				conn.send(b"Recevied \n")
 
-	except Exception as e:
-		print(str(e))
-	finally:
-	    	conn.close()
-    		print ('Client disconnected')
+		except Exception as e:
+			print(str(e))
+		finally:
+    			print ('Client disconnected')
 
 
 

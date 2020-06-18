@@ -300,6 +300,7 @@ public class BikeControllerActivity extends AppCompatActivity implements Hotspot
             syncConnection.setVisibility(View.GONE);
             tripDetails.setVisibility(View.GONE);
 
+
             Log.d("Hotspot", "Starting Hotspot");
             if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
                     PackageManager.PERMISSION_GRANTED) {
